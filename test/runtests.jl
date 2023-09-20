@@ -1,11 +1,11 @@
-using Test
-include("../src/operators.jl")
+using Test, Porcupine, StaticArrays
 
 dx = 0.1
 x = 0:dx:0.5
 y = x .^ 2
 d = Del(dx)
 @test d(y) ≈ [0.2, 0.4, 0.6, 0.8]
+@test d(y, border=:smooth) ≈ [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 
 dy = dx = 0.1
 a = [x^2 + y^2 for x in 0:dx:0.5, y in 0:dy:0.5]

@@ -1,6 +1,4 @@
-using Functors
-# using Zygote
-
+using ArrayPadding
 include("grid.jl")
 include("conv.jl")
 
@@ -9,15 +7,25 @@ struct Op
 end
 @functor Op
 
-function (m::Op)(a)
-    conv(a, m.kernel)[[i:j for (i, j) in zip(size(m.kernel), size(a))]...]
+function (m::Op)(a, p...; border=nothing)
+    if border !== nothing
+        s = (size(m.kernel) .- 1) .÷ 2
+        if border !== :smooth
+            a = pad(a, border, s)
+        end
+    end
+    r = conv(a, m.kernel, p...)[[i:j for (i, j) in zip(size(m.kernel), size(a))]...]
+    if border == :smooth
+        r = pad(r, :smooth, s)
+    end
+    r
 end
 
 """
     Del(resolutions::AbstractVector)
     Del(cell::AbstractMatrix)
 
-constructs ∇ operator (derivative, gradient, divergence, curl) using central difference stencil. Because the stencil is of length 3 in each dimension, the result is 2 elements shorter in each dimension than the input.
+constructs ∇ operator (derivative, gradient, divergence, curl) using central difference stencil. Because the stencil is of length 3 in each dimension, the result is 2 elements shorter in each dimension than the input. To instead retain the same size, use `border=:smooth` which pads the input
 
 # Example
 ## 1d derivative
@@ -27,6 +35,7 @@ x = 0:dx:.5
 y = x .^ 2
 d = Del(dx)
 @test d(y)≈[ 0.2, 0.4,0.6,0.8]
+@test d(y, border=:smooth) ≈ [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 ```
 
 ## 2d gradient
@@ -89,7 +98,7 @@ function Lap(a)
 
     kernel = Del(cell).kernel
     kernel = [
-        conv(kernel, kernel)[i...]
+        conv(kernel, kernel, :dot)[i...]
         for i in Iterators.product(fill((1, 3, 5), dims)...)
     ] * 4
 

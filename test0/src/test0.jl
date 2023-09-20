@@ -1,5 +1,5 @@
-module FDMTK
+module test0
 
 greet() = print("Hello World!")
 
-end # module FDMTK
+end # module test0

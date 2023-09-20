@@ -1,0 +1,4 @@
+name = "test0"
+uuid = "1a6d17b8-8621-489c-99d2-5c36dbc3d0b6"
+authors = ["Paul Shen <pxshen@alumni.stanford.edu>"]
+version = "0.1.0"
