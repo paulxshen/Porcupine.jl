@@ -15,7 +15,7 @@ function (m::Op)(a, p...; border=nothing)
         end
     end
     r = conv(a, m.kernel, p...)[[i:j for (i, j) in zip(size(m.kernel), size(a))]...]
-    if border == :smooth
+    if border == :smooth && s .== 1
         r = pad(r, :smooth, s)
     end
     r
