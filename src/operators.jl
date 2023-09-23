@@ -1,4 +1,4 @@
-using ArrayPadding
+using ArrayPadding, LinearAlgebra
 include("grid.jl")
 include("conv.jl")
 
@@ -14,12 +14,16 @@ function (m::Op)(a, p...; border=nothing)
             a = pad(a, border, s)
         end
     end
-    r = conv(a, m.kernel, p...)[[i:j for (i, j) in zip(size(m.kernel), size(a))]...]
-    if border == :smooth && s .== 1
+    r = conv(m.kernel, a, p...)[[i:j for (i, j) in zip(size(m.kernel), size(a))]...]
+    if border == :smooth && all(s .== 1)
         r = pad(r, :smooth, s)
     end
     r
 end
+
+# function Base.dot(m::Op, a)
+
+# end
 
 """
     Del(resolutions::AbstractVector)
@@ -42,8 +46,8 @@ d = Del(dx)
 ```
 dy = dx = 0.1
 a = [x^2 + y^2 for x in 0:dx:0.5, y in 0:dy:0.5]
-▽ = Del([dx, dy])
-▽(a)
+∇ = Del([dx, dy])
+∇(a)
 
 #=
 4×4 Matrix{SVector{2, Float64}}:
@@ -80,8 +84,8 @@ constructs Laplacian operator
 # 2d Example
 dy = dx = 0.1
 a = [x^2 + y^2 for x in 0:dx:0.5, y in 0:dy:0.5]
-▽2 = Lap([dx, dy])
-▽2(a)
+∇2 = Lap([dx, dy])
+∇2(a)
 
 #=
 4x4 Matrix{Float64}:
@@ -105,11 +109,14 @@ function Lap(a)
     return Op(kernel)
 end
 
+function Op(radfunc, rmax, a, l=0; kw...)
+    cell = Grid(a).cell
+end
 """
     Gauss(resolutions, σ, rmax; kw...)
     Gauss(cell, σ, rmax; kw...)
 
-constructs Gaussian diffusion operator with volume Normalized to 1 wrt grid support
+constructs Gaussian blur operator with volume Normalized to 1 wrt grid support
 """
 function Gauss(a, σ; rmax=2σ, kw...)
     cell = Grid(a).cell
