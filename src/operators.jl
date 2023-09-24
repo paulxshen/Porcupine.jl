@@ -57,6 +57,28 @@ a = [x^2 + y^2 for x in 0:dx:0.5, y in 0:dy:0.5]
  [0.8, 0.2]  [0.8, 0.4]  [0.8, 0.6]  [0.8, 0.8]
 =#
 ```
+
+## 2d divergence, curl
+curl of 2d Vector field is taken to be vorticity scalar field. In 3d curl produces vorticity vector field.
+```
+a = collect.([
+    (0, 0) (-1, 0) (0, 0)
+    (0, -1) (0, 0) (0, 1)
+    (0, 0) (1, 0) (0, 0)
+])
+∇ = Del([1, 1])
+@test ∇(a, :dot) ≈ [2]'
+@test ∇(a, :cross) ≈ [0]'
+
+a = collect.([
+    (0, 0) (0, 1) (0, 0)
+    (-1, 0) (0, 0) (1, 0)
+    (0, 0) (0, -1) (0, 0)
+])
+∇ = Del([1, 1])
+@test ∇(a, :dot) ≈ [0]' 
+@test ∇(a, :cross) ≈ [-2]'
+```
 """
 function Del(a)
     cell = Grid(a).cell
