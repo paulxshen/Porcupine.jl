@@ -1,4 +1,4 @@
-using Test, Porcupine, StaticArrays
+using Test, Porcupine, StaticArrays, LinearAlgebra
 atol = 1e-6
 
 dx = 0.1
@@ -33,8 +33,8 @@ a = collect.([
     (0, 0) (1, 0) (0, 0)
 ])
 ∇ = Del([1, 1])
-@test ∇(a, :dot) ≈ [2]'
-@test ∇(a, :cross) ≈ [0]'
+@test ∇ ⋅ a ≈ ∇(a, dot) ≈ [2]'
+@test ∇ × a ≈ ∇(a, cross) ≈ [0]'
 
 a = collect.([
     (0, 0) (0, 1) (0, 0)
@@ -42,5 +42,5 @@ a = collect.([
     (0, 0) (0, -1) (0, 0)
 ])
 ∇ = Del([1, 1])
-@test ∇(a, :dot) ≈ [0]' atol = atol
-@test ∇(a, :cross) ≈ [-2]' atol = atol
+@test ∇ ⋅ a ≈ [0]' atol = atol
+@test ∇ × a ≈ [-2]' atol = atol

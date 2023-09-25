@@ -1,11 +1,11 @@
 
-using StaticArrays
+using StaticArrays, LinearAlgebra
 using DSP
 function conv(u::AbstractArray{S}, v::AbstractArray{T}, p) where {S<:AbstractVector,T<:AbstractVector}
     n = length(u[1])
-    if p == :dot
+    if p == dot || p == :dot
         sum(conv.([getindex.(u, i) for i = 1:n], [getindex.(v, i) for i = 1:n]))
-    elseif p == :cross
+    elseif p == cross || p == :cross
         if n == 2
             conv(getindex.(u, 1), getindex.(v, 2)) - conv(getindex.(u, 2), getindex.(v, 1))
         elseif n == 3

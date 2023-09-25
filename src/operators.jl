@@ -21,9 +21,13 @@ function (m::Op)(a, p...; border=nothing)
     r
 end
 
-# function Base.dot(m::Op, a)
+function LinearAlgebra.dot(m::Op, a::AbstractArray)
+    m(a, dot)
+end
 
-# end
+function LinearAlgebra.cross(m::Op, a::AbstractArray)
+    m(a, cross)
+end
 
 """
     Del(resolutions::AbstractVector)
@@ -67,8 +71,8 @@ a = collect.([
     (0, 0) (1, 0) (0, 0)
 ])
 ∇ = Del([1, 1])
-@test ∇(a, :dot) ≈ [2]'
-@test ∇(a, :cross) ≈ [0]'
+@test ∇ ⋅ a ≈ ∇(a, dot) ≈ [2]'
+@test ∇ × a ≈ ∇(a, cross) ≈ [0]'
 
 a = collect.([
     (0, 0) (0, 1) (0, 0)
@@ -76,8 +80,8 @@ a = collect.([
     (0, 0) (0, -1) (0, 0)
 ])
 ∇ = Del([1, 1])
-@test ∇(a, :dot) ≈ [0]' 
-@test ∇(a, :cross) ≈ [-2]'
+@test ∇ ⋅ a ≈ [0]' 
+@test ∇ × a ≈ [-2]' 
 ```
 """
 function Del(a)

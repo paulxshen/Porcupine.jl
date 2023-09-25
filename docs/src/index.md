@@ -6,3 +6,6 @@ Finite difference operators on scalar and vector fields including derivative, gr
 Del
 Lap
 ```
+
+## Contributors
+Paul Shen, MLE EE, Stanford MS EE, pxshen@alumni.stanford.edu
