@@ -1,4 +1,4 @@
 module Porcupine
-include("operators.jl")
-export Del, Lap
+include("del.jl")
+export Del#, Lap, Op, Gauss
 end # module FDMTK

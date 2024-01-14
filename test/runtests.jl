@@ -6,7 +6,8 @@ x = 0:dx:0.5
 y = x .^ 2
 d = Del(dx)
 @test d(y) ≈ [0.2, 0.4, 0.6, 0.8]
-@test d(y, border=:smooth) ≈ [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+d = Del(dx, false)
+@test d(y) ≈ diff(y)
 
 dy = dx = 0.1
 a = [x^2 + y^2 for x in 0:dx:0.5, y in 0:dy:0.5]
@@ -44,3 +45,6 @@ a = collect.([
 ∇ = Del([1, 1])
 @test ∇ ⋅ a ≈ [0]' atol = atol
 @test ∇ × a ≈ [-2]' atol = atol
+
+g = Gauss(1, [0.1, 0.1])
+@test sum(g.kernel) ≈ 1 atol = 0.05

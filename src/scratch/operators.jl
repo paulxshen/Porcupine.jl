@@ -7,18 +7,8 @@ struct Op
 end
 @functor Op
 
-function (m::Op)(a, p...; border=nothing)
-    if border !== nothing
-        s = (size(m.kernel) .- 1) .÷ 2
-        if border !== :smooth
-            a = pad(a, border, s)
-        end
-    end
-    r = conv(m.kernel, a, p...)[[i:j for (i, j) in zip(size(m.kernel), size(a))]...]
-    if border == :smooth && all(s .== 1)
-        r = pad(r, :smooth, s)
-    end
-    r
+function (m::Op)(a, p=*)
+    r = conv(m.kernel, a, p)[[i:j for (i, j) in zip(size(m.kernel), size(a))]...]
 end
 
 function LinearAlgebra.dot(m::Op, a::AbstractArray)
@@ -84,19 +74,19 @@ a = collect.([
 @test ∇ × a ≈ [-2]' 
 ```
 """
-function Del(a)
+function Del(a, centered=true)
     cell = Grid(a).cell
-    dims = size(cell, 1)
+    d = size(cell, 1)
 
-    if dims == 1
-        kernel = [1, 0, -1] / 2 / cell[1]
+    kernel = centered ? [1, 0, -1] / 2 : [1, -1]
+    if d == 1
+        kernel /= cell[1]
     else
         kernel = [
-            SVector{dims}(sum(abs.(v)) > 1 ? zeros(dims) : -cell' \ collect(v) / 2)
-            for v in Iterators.product(fill(-1:1, dims)...)
+            SVector{d}(sum(abs.(v)) > 1 ? zeros(d) : cell' \ collect(v))
+            for v in Iterators.product(fill(kernel, d)...)
         ]
     end
-    # kernel /= det(grid.cell)
     return Op(kernel)
 end
 
@@ -124,29 +114,41 @@ a = [x^2 + y^2 for x in 0:dx:0.5, y in 0:dy:0.5]
 """
 function Lap(a)
     cell = Grid(a).cell
-    dims = size(cell, 1)
+    d = size(cell, 1)
 
     kernel = Del(cell).kernel
     kernel = [
         conv(kernel, kernel, :dot)[i...]
-        for i in Iterators.product(fill((1, 3, 5), dims)...)
+        for i in Iterators.product(fill((1, 3, 5), d)...)
     ] * 4
 
     return Op(kernel)
 end
 
-function Op(radfunc, rmax, a, l=0; kw...)
+function Op(radfunc, a, rmax::Real, l::Int=0; kw...)
     cell = Grid(a).cell
+    lims = ceil.(Int, rmax ./ norm.(eachcol(cell)))
+    d = length(lims)
+    kernel = det(cell) * map(Iterators.product([-i:i for i = lims]...)) do I
+        v = cell * collect(I)
+        r = norm(v)
+        if l == 0
+            return r > rmax ? 0 : radfunc(r)
+        elseif l == 1
+            return SVector{d}(r > rmax || r == 0 ? zeros(d) : radfunc(r) / r * v)
+        end
+    end
+    Op(kernel)
 end
 """
-    Gauss(resolutions, σ, rmax; kw...)
-    Gauss(cell, σ, rmax; kw...)
+    Gauss(σ, resolutions, rmax=3σ)
+    Gauss(σ, cell, rmax=3σ)
 
 constructs Gaussian blur operator with volume Normalized to 1 wrt grid support
 """
-function Gauss(a, σ; rmax=2σ, kw...)
+function Gauss(σ, a, rmax=3σ)
     cell = Grid(a).cell
     radfunc = r -> exp(-r^2 / (2 * σ^2)) / sqrt((2π * σ^2)^size(cell, 1))
-    return Op(radfunc, rmax, cell; kw...)
+    return Op(radfunc, cell, rmax,)
 end
 
