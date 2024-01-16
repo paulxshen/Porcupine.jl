@@ -1,4 +1,4 @@
-using ArrayPadding
+using ArrayPadding, LinearAlgebra
 using UnPack
 Base.:+(x::AbstractArray, y::Number) = x .+ y
 Base.:+(x::Number, y::AbstractArray) = x .+ y
