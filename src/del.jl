@@ -1,16 +1,15 @@
-using ArrayPadding, LinearAlgebra
-using UnPack
+# using ArrayPadding
+using UnPack, LinearAlgebra
 Base.:+(x::AbstractArray, y::Number) = x .+ y
 Base.:+(x::Number, y::AbstractArray) = x .+ y
 Base.:-(x::AbstractArray, y::Number) = x .- y
 Base.:-(x::Number, y::AbstractArray) = x .- y
-VF = Union{AbstractVector{<:AbstractArray},Tuple{<:AbstractArray}}
+VF = Union{AbstractVector{<:AbstractArray},Tuple}
 struct Del
     Δ::AbstractArray
-    cd::Bool
 
-    function Del(Δ::AbstractArray, cd::Bool=false)
-        new(Δ, cd)
+    function Del(Δ::AbstractArray)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
+        new(Δ,)
     end
 end
 # @functor Del
@@ -19,6 +18,23 @@ function pdiff(a::AbstractArray, ; dims, cd=false)
     if cd
     else
         diff(a; dims)
+    end
+end
+function pdiff(a::PaddedArray, ; dims, cd=false)
+    @unpack a, l, r = a
+    I = [i == dims ? (:) : a:b for (i, (a, b)) = enumerate(zip(l .+ 1, size(a) .- r))]
+    pdiff(a[I...]; dims, cd)
+end
+function sdiff(a, ; dims, cd=false)
+    select = 1:ndims(a) .== dims
+    shifts = right(a) - left(a)
+    a = collect(a)
+    # a = circshift(a, (shifts) .* .!select)
+    v = shifts[dims]
+    if v == 1
+        return a - circshift(a, select)
+    elseif v == -1
+        return circshift(a, -select) - a
     end
 end
 function pdiff(a::PaddedArray, ; dims, cd=false)
@@ -42,7 +58,6 @@ end
 
 function (m::Del)(a, p=*)
     # function (m::Del)(a::AbstractVector{<:AbstractArray}, p=*)
-    @unpack cd = m
     n = length(m.Δ)
     # I = [ax[begin:end-1] for ax = axes(first(a))]
     if p == dot
@@ -51,21 +66,21 @@ function (m::Del)(a, p=*)
         if n == 2
             dx, dy = m.Δ
             if length(a) == 1
-                return [pdiff(a[1], dims=2) / dy, -pdiff(a[1], dims=1) / dx]
+                u, = a
+                return [sdiff(u, dims=2) / dy, -sdiff(u, dims=1) / dx]
             else
                 u, v = a
-                return [pdiff(v, dims=1) / dx - pdiff(u, dims=2) / dy]
-                # return [pdiff(v, dims=1) / dx - pdiff(u, dims=2) / dy]
+                return [sdiff(v, dims=1) / dx - sdiff(u, dims=2) / dy]
             end
         elseif n == 3
             dx, dy, dz = m.Δ
             u, v, w = a
-            uy = pdiff(u, dims=2) / dy
-            uz = pdiff(u, dims=3) / dz
-            vx = pdiff(v, dims=1) / dx
-            vz = pdiff(v, dims=3) / dz
-            wx = pdiff(w, dims=1) / dx
-            wy = pdiff(w, dims=2) / dy
+            uy = sdiff(u, dims=2) / dy
+            uz = sdiff(u, dims=3) / dz
+            vx = sdiff(v, dims=1) / dx
+            vz = sdiff(v, dims=3) / dz
+            wx = sdiff(w, dims=1) / dx
+            wy = sdiff(w, dims=2) / dy
             return [wy - vz, uz - wx, vx - uy]
         end
     end
