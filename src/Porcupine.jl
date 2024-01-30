@@ -1,4 +1,4 @@
 module Porcupine
 include("del.jl")
-export Del#, Lap, Op, Gauss
+export Del, StaggeredDel, CenteredDel#, Lap, Op, Gauss
 end # module FDMTK
