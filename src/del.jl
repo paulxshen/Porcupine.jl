@@ -5,15 +5,18 @@ Base.:+(x::Number, y::AbstractArray) = x .+ y
 Base.:-(x::AbstractArray, y::Number) = x .- y
 Base.:-(x::Number, y::AbstractArray) = x .- y
 VF = Union{AbstractVector{<:AbstractArray},Tuple}
-struct Del
+struct StaggeredDel
     Δ::AbstractArray
 
-    function Del(Δ::AbstractArray)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
+    function StaggeredDel(Δ::AbstractArray)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
         new(Δ,)
     end
 end
-# @functor Del
-
+# @functor StaggeredDel
+struct CenteredDel
+    Δ::AbstractArray
+end
+Del = Union{StaggeredDel,CenteredDel}
 function pdiff(a::AbstractArray, ; dims, cd=false)
     if cd
     else
@@ -37,11 +40,6 @@ function sdiff(a, ; dims, cd=false)
         return circshift(a, -select) - a
     end
 end
-function pdiff(a::PaddedArray, ; dims, cd=false)
-    @unpack a, l, r = a
-    I = [i == dims ? (:) : a:b for (i, (a, b)) = enumerate(zip(l .+ 1, size(a) .- r))]
-    pdiff(a[I...]; dims, cd)
-end
 function (m::Del)(a::AbstractArray{<:Number}, p=*)
     n = length(m.Δ)
     if n == 1
@@ -56,7 +54,7 @@ function (m::Del)(a::AbstractArray{<:Number}, p=*)
     end
 end
 
-function (m::Del)(a, p=*)
+function (m::StaggeredDel)(a, p=*)
     # function (m::Del)(a::AbstractVector{<:AbstractArray}, p=*)
     n = length(m.Δ)
     # I = [ax[begin:end-1] for ax = axes(first(a))]
