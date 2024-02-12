@@ -38,6 +38,10 @@ function sdiff(a, ; dims, cd=false)
         return a - circshift(a, select)
     elseif v == -1
         return circshift(a, -select) - a
+    elseif left(a)[dims] == 1
+        return diff(a; dims)
+    elseif left(a)[dims] == 0
+        return pad(diff(a; dims), 0, select)
     end
 end
 function (m::Del)(a::AbstractArray{<:Number}, p=*)
