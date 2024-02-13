@@ -36,11 +36,11 @@ function sdiff(a, ; dims, cd=false)
     v = shifts[dims]
     a_ = bufferfrom(a)
     if v == 1
-        # return a - circshift(a, select)
-        i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
+        return a - circshift(a, select)
+        # i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
     elseif v == -1
-        i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
-        # return circshift(a, -select) - a
+        # i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
+        return circshift(a, -select) - a
     elseif left(a)[dims] == 1
         return diff(a; dims)
     elseif left(a)[dims] == 0
