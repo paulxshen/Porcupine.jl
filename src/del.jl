@@ -38,14 +38,14 @@ function sdiff(a, ; dims, cd=false)
     # a_ = bufferfrom(a)
     if sum(v) == 1
         # if v == 1
-        return a - circshift(a, select)
-        # i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
+        # return a - circshift(a, select)
+        i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
         # i_ = [i == dims ? (1:1) : ax for (i, ax) = enumerate(axes(a))]
     elseif sum(v) == -1
         # elseif v == -1
-        # i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
+        i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
         # i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = enumerate(axes(a))]
-        return circshift(a, -select) - a
+        # return circshift(a, -select) - a
     elseif sum(left(a)[dims:dims]) == 1
         # elseif left(a)[dims] == 1
         return diff(a; dims)
@@ -53,9 +53,9 @@ function sdiff(a, ; dims, cd=false)
         # elseif left(a)[dims] == 0
         return pad(diff(a; dims), 0, select)
     end
-    # a_[i...] = diff(a; dims)
+    a_[i...] = diff(a; dims)
     # a_[i_...] .= 0
-    # copy(a_)
+    copy(a_)
 end
 function (m::Del)(a::AbstractArray{<:Number}, p=*)
     n = length(m.Δ)
