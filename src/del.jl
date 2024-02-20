@@ -35,7 +35,7 @@ function sdiff(a, ; dims, cd=false)
     # a = circshift(a, (shifts) .* .!select)
     # v = shifts[dims]
     v = shifts[dims:dims]
-    # a_ = bufferfrom(a)
+    a_ = bufferfrom(a)
     if sum(v) == 1
         # if v == 1
         # return a - circshift(a, select)
