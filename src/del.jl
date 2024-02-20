@@ -29,6 +29,7 @@ function pdiff(a::PaddedArray, ; dims, cd=false)
     pdiff(a[I...]; dims, cd)
 end
 function sdiff(a, ; dims, cd=false)
+    print(typeof(a))
     select = 1:ndims(a) .== dims
     shifts = right(a) - left(a)
     a = collect(a)
@@ -55,6 +56,7 @@ function sdiff(a, ; dims, cd=false)
     end
     a_[i...] = diff(a; dims)
     # a_[i_...] .= 0
+    print(typeof(a_))
     copy(a_)
 end
 function (m::Del)(a::AbstractArray{<:Number}, p=*)
