@@ -33,19 +33,24 @@ function sdiff(a, ; dims, cd=false)
     shifts = right(a) - left(a)
     a = collect(a)
     # a = circshift(a, (shifts) .* .!select)
-    v = shifts[dims]
+    # v = shifts[dims]
+    v = shifts[dims:dims]
     # a_ = bufferfrom(a)
-    if v == 1
+    if sum(v) == 1
+        # if v == 1
         return a - circshift(a, select)
         # i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
         # i_ = [i == dims ? (1:1) : ax for (i, ax) = enumerate(axes(a))]
-    elseif v == -1
+    elseif sum(v) == -1
+        # elseif v == -1
         # i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
         # i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = enumerate(axes(a))]
         return circshift(a, -select) - a
-    elseif left(a)[dims] == 1
+    elseif sum(left(a)[dims:dims]) == 1
+        # elseif left(a)[dims] == 1
         return diff(a; dims)
-    elseif left(a)[dims] == 0
+    elseif sum(left(a)[dims:dims]) == 0
+        # elseif left(a)[dims] == 0
         return pad(diff(a; dims), 0, select)
     end
     # a_[i...] = diff(a; dims)
