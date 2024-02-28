@@ -40,11 +40,11 @@ function sdiff(a, ; dims, cd=false)
     if v == 1
         # return a - circshift(a, select)
         i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
-        # i_ = [i == dims ? (1:1) : ax for (i, ax) = enumerate(axes(a))]
+        i_ = [i == dims ? (1:1) : ax for (i, ax) = enumerate(axes(a))]
     elseif v == -1
         # return circshift(a, -select) - a
         i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
-        # i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = enumerate(axes(a))]
+        i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = enumerate(axes(a))]
     elseif left(a)[dims] == 1
         return diff(a; dims)
     elseif left(a)[dims] == 0
@@ -52,6 +52,7 @@ function sdiff(a, ; dims, cd=false)
     end
 
     a_[i...] = diff(a; dims)
+    a_[i_...] = fill(0, length.(i_)...)
     # fill![i_...] .= 0
     copy(a_)
 end
