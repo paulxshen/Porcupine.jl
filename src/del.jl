@@ -1,5 +1,4 @@
 # using 
-Base.ndims(b::Zygote.Buffer) = Base.ndims(b.data)
 Base.:+(x::AbstractArray, y::Number) = x .+ y
 Base.:+(x::Number, y::AbstractArray) = x .+ y
 Base.:-(x::AbstractArray, y::Number) = x .- y
