@@ -1,6 +1,6 @@
 module Porcupine
-using UnPack, LinearAlgebra, Zygote, ArrayPadding
-using Zygote: Buffer
+using UnPack, LinearAlgebra, ArrayPadding
+# using Zygote: Buffer
 include("del.jl")
-export Del, StaggeredDel, CenteredDel#, Lap, Op, Gauss
+export Del, StaggeredDel, CenteredDel, Laplacian#, Op, Gauss
 end # module FDMTK

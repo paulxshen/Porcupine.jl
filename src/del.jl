@@ -4,7 +4,7 @@ Base.:+(x::AbstractArray, y::Number) = x .+ y
 Base.:+(x::Number, y::AbstractArray) = x .+ y
 Base.:-(x::AbstractArray, y::Number) = x .- y
 Base.:-(x::Number, y::AbstractArray) = x .- y
-VF = Union{AbstractVector{<:AbstractArray},Tuple}
+VF = Union{AbstractVector{<:AbstractArray},Tuple,AbstractDict,NamedTuple}
 struct StaggeredDel
     Δ::AbstractArray
 
@@ -16,18 +16,18 @@ end
 struct CenteredDel
     Δ::AbstractArray
 end
+struct Laplacian
+    Δ::AbstractArray
+end
 Del = Union{StaggeredDel,CenteredDel}
-function pdiff(a::AbstractArray, ; dims, cd=false)
-    if cd
-    else
-        diff(a; dims)
-    end
+function lap(a::AbstractArray, ; dims=1)
+    select = 1:ndims(a) .== dims
+    circshift(a, -select) - 2a + circshift(a, select)
 end
-function pdiff(a::PaddedArray, ; dims, cd=false)
-    @unpack a, l, r = a
-    I = [i == dims ? (:) : a:b for (i, (a, b)) = enumerate(zip(l .+ 1, size(a) .- r))]
-    pdiff(a[I...]; dims, cd)
+function cdiff(a::AbstractArray, ; dims,)
+    diff(a; dims)
 end
+
 function sdiff(a, ; dims, cd=false)
     select = 1:ndims(a) .== dims
     shifts = right(a) - left(a)
@@ -80,7 +80,7 @@ function (m::Del)(a::AbstractArray{<:Number}, p=*)
 end
 
 function (m::StaggeredDel)(a, p=*)
-    # function (m::Del)(a::AbstractVector{<:AbstractArray}, p=*)
+    a = a |> values
     n = length(m.Δ)
     # I = [ax[begin:end-1] for ax = axes(first(a))]
     if p == dot
@@ -107,6 +107,12 @@ function (m::StaggeredDel)(a, p=*)
             return [wy - vz, uz - wx, vx - uy]
         end
     end
+end
+function (m::Laplacian)(a)
+    sum([lap(a, dims=i) * Δ for (i, Δ) = zip(m.Δ)])
+end
+function (m::Laplacian)(v::VF)
+    m.(a)
 end
 function LinearAlgebra.cross(a::VF, b::VF)
     u, v, w = b

@@ -7,11 +7,9 @@ version = "0.1.12"
 ArrayPadding = "fe5ef43c-4912-423d-9170-4bd5cb6a013a"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
-Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 ArrayPadding = "0.1"
 LinearAlgebra = "1.9"
 UnPack = "1.0"
 julia = "1.9"
-Zygote="0.6"
