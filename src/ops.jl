@@ -6,7 +6,7 @@ Base.:-(x::Number, y::AbstractArray) = x .- y
 VF = Union{AbstractVector{<:AbstractArray},Tuple,AbstractDict,NamedTuple}
 
 
-function _keys(x::OrderedDict)
+function _keys(x::AbstractDict)
     k = 0
     ignore_derivatives() do
         k = keys(x) |> collect
