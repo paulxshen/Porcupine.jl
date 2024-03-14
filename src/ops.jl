@@ -5,7 +5,17 @@ Base.:-(x::AbstractArray, y::Number) = x .- y
 Base.:-(x::Number, y::AbstractArray) = x .- y
 VF = Union{AbstractVector{<:AbstractArray},Tuple,AbstractDict,NamedTuple}
 
-Base.:*(a::AbstractDict, b) = [a[k] .* b for (k, b) = zip(keys(a), b)]
+
+function _keys(x::OrderedDict)
+    k = 0
+    ignore_derivatives() do
+        k = keys(x) |> collect
+    end
+    k
+end
+_keys(x) = keys(x)
+
+Base.:*(a::AbstractDict, b) = [a[k] .* b for (k, b) = zip(_keys(a), b)]
 # broadcast(values(a), b) do a, b
 #     a .* b
 # end
