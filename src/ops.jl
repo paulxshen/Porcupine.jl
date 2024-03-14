@@ -15,6 +15,11 @@ function _keys(x::AbstractDict)
 end
 _keys(x) = keys(x)
 
+function _values(x::AbstractDict)
+    [x[k] for k = _keys(x)]
+end
+_values(x) = values(x)
+
 Base.:*(a::AbstractDict, b) = [a[k] .* b for (k, b) = zip(_keys(a), b)]
 # broadcast(values(a), b) do a, b
 #     a .* b

@@ -73,7 +73,7 @@ function (m::Del)(a::AbstractArray{<:Number}, p=*)
 end
 
 function (m::StaggeredDel)(a, p=*)
-    a = a |> values
+    a = a |> _values
     n = length(m.Δ)
     # I = [ax[begin:end-1] for ax = axes(first(a))]
     if p == dot
