@@ -1,5 +1,5 @@
 module Porcupine
-using UnPack, LinearAlgebra, ArrayPadding
+using UnPack, LinearAlgebra, ArrayPadding, ChainRulesCore
 # using Zygote: Buffer
 include("ops.jl")
 include("del.jl")
