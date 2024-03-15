@@ -108,9 +108,17 @@ function (m::Laplacian)(v::VF)
     m.(a)
 end
 function LinearAlgebra.cross(a::VF, b::VF)
-    u, v, w = b
-    x, y, z = a
-    return [w .* y - v .* z, u .* z - w .* x, v .* x - u .* y]
+    if length(a) == length(b) == 3
+        u, v, w = b
+        x, y, z = a
+        return [w .* y - v .* z, u .* z - w .* x, v .* x - u .* y]
+    elseif length(a) == 1 && length(b) == 2
+        z, = a
+        u, v, = b
+        return [-v .* z, u .* z,]
+    elseif length(a) == 2 && length(b) == 1
+        return -b × a
+    end
 end
 function LinearAlgebra.dot(m::Del, a)
     m(a, dot)

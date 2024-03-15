@@ -6,21 +6,20 @@ Base.:-(x::Number, y::AbstractArray) = x .- y
 VF = Union{AbstractVector{<:AbstractArray},Tuple,AbstractDict,NamedTuple}
 
 
-function _keys(x::AbstractDict)
-    k = 0
+function keys(x)
     ignore_derivatives() do
-        k = keys(x) |> collect
+        Base.keys(x) |> collect
     end
-    k
 end
-_keys(x) = keys(x)
 
 function _values(x::AbstractDict)
-    [x[k] for k = _keys(x)]
+    [x[k] for k = keys(x)]
 end
 _values(x) = values(x)
 
-Base.:*(a::AbstractDict, b) = [a[k] .* b for (k, b) = zip(_keys(a), b)]
+dmul(a, b) = [a[k] .* b for (k, b) = zip(keys(a), b)]
+Base.:*(a::AbstractDict, b) = dmul(a, b)
+Base.:*(a::AbstractDict, b::AbstractDict) = dmul(a, b)
 # broadcast(values(a), b) do a, b
 #     a .* b
 # end
