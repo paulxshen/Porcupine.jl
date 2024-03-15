@@ -12,12 +12,13 @@ function keys(x)
     end
 end
 
-function _values(x::AbstractDict)
+function values(x::AbstractDict)
     [x[k] for k = keys(x)]
 end
-_values(x) = values(x)
+values(x) = Base.values(x)
 
-dmul(a, b) = [a[k] .* b for (k, b) = zip(keys(a), b)]
+dmul(a, b) = [a .* b for (a, b) = zip(values(a), values(b))]
+# [a[k] .* b for (k, b) = zip(keys(a), b)]
 Base.:*(a::AbstractDict, b) = dmul(a, b)
 Base.:*(a::AbstractDict, b::AbstractDict) = dmul(a, b)
 # broadcast(values(a), b) do a, b
