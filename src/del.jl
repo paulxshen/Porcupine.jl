@@ -1,3 +1,5 @@
+VF = Union{AbstractVector{<:AbstractArray},Tuple,AbstractDict,NamedTuple}
+
 struct StaggeredDel
     Δ::AbstractArray
 
