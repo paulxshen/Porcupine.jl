@@ -1,7 +1,6 @@
 module Porcupine
-using UnPack, LinearAlgebra, ArrayPadding, ChainRulesCore
-# using Zygote: Buffer
-# include("ops.jl")
-include("del.jl")
+include("main.jl")
 export Del, StaggeredDel, CenteredDel, Laplacian#, Op, Gauss
+export dict, keys, values, Numberlike, Dictlike
+
 end # module FDMTK
