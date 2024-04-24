@@ -1,16 +1,11 @@
-using DataStructures, ChainRulesCore
+using DataStructures, ChainRulesCore, LinearAlgebra
 
-° = π / 180
 # Base.map(f, c::AbstractSet) = f.(c)
-Base.round(x::AbstractFloat) = Base.round(Int, x)
-Base.ndims(a) = length(size(a))
-Base.size(x) = (length(x),)
-
-Base.getindex(s::Symbol, i) = Symbol(String(s)[i])
 # (f::Any)(a...; kw...) = f.(a...; kw...)
 # (f::typeof(+))(x::Int)=1
 
 Numberlike = Union{Tuple,AbstractArray,Number}
+LinearAlgebra.dot(x::Numberlike, y::Numberlike) = sum(x .* y)
 Base.:-(x::Numberlike, y::Numberlike) = x .- y
 Base.:+(x::Numberlike, y::Numberlike) = x .+ y
 Base.:*(x::Number, y::Numberlike) = x .* y
@@ -24,12 +19,31 @@ function keys(x)
     end
 end
 
-function values(x::AbstractDict)
+function values(x)
     [x[k] for k = keys(x)]
 end
-values(x::NamedTuple) = collect(x)
-values(x) = Base.values(x)
-
+# Base.values(x::NamedTuple) = collect(x)
+# values(x) = Base.values(x)
+Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
+Base.getproperty(d::AbstractDict, k) = hasfield(d, k) ? getfield(d, k) : d[k]
+Base.getindex(d::AbstractDict, k::Int) = haskey(d, k) ? d[k] : values(d)[k]
+struct Null end
+null = Null()
+function _getindex(c, k)
+    if k in keys(c)
+        return c[k]
+    else
+        for v = values(c)
+            v = _getindex(v, k)
+            if v != null
+                return v
+            end
+        end
+    end
+    null
+end
+Base.getindex(c::AbstractDict, k) = _getindex(c, k)
+Base.getindex(c::NamedTuple, k) = _getindex(c, k)
 # function dict(T::Type{NamedTuple}, v)
 #     NamedTuple(v)
 # end
@@ -81,28 +95,13 @@ Base.:/(x::T, y) where {T<:Dictlike} = _f(T, /, x, y)
 Base.:/(x::T, y::T) where {T<:Dictlike} = _f(T, /, x, y)
 Base.:/(x, y::T) where {T<:Dictlike} = _f(T, /, y, x, true)
 
-# Base.:-(x::T, y) where T<:Dictlike = dict(T,[k => (x[k] - y) for (k, y) = zip(keys(x), (y))])
-# Base.:*(a::T, b) where {T<:Dictlike} = dict(T, [a[k] .* b for (k, b) = zip(keys(a), values(b))])
-# Base.:*(a::T, b::T) where {T<:Dictlike} = dict(T, [a[k] .* b for (k, b) = zip(keys(a), b |> values)])
-# Base.:*(a, b::T) where {T<:Dictlike} = b * a
-# Base.:*(a::T, b) where {T<:Dictlike} = dict(T, [a[k] .* b for (k, b) = zip(keys(a), values(b))])
-# Base.:*(a::T, b::T) where {T<:Dictlike} = dict(T, [a[k] .* b for (k, b) = zip(keys(a), b |> values)])
-# Base.:*(a, b::T) where {T<:Dictlike} = b * a
-
-
-
-
-
-# Base.:*(a::VF, b::AbstractArray{<:Number}) = a * [b]
-# Base.:*(a::AbstractArray{<:Number}, b::VF) = [a] * b
-# Base.:/(a::VF, b::VF) =
-#     broadcast(values(a), values(b)) do a, b
-#         a ./ b
-#     end
-# Base.:/(a::VF, b::AbstractArray{<:Number}) = a / [b]
-# Base.:/(a::AbstractArray{<:Number}, b::VF) = [a] / b
-
+° = π / 180
 (m::Number)(a...) = m
 d2(x) = round.(x, sigdigits=2)
 gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)
 
+Base.round(x::AbstractFloat) = Base.round(Int, x)
+Base.ndims(a) = length(size(a))
+Base.size(x) = (length(x),)
+
+Base.getindex(s::Symbol, i) = Symbol(String(s)[i])
