@@ -25,7 +25,9 @@ end
 # Base.values(x::NamedTuple) = collect(x)
 # values(x) = Base.values(x)
 Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
-Base.getproperty(d::AbstractDict, k) = hasfield(d, k) ? getfield(d, k) : d[k]
+Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : d[k]
+
+# Base.getproperty(d::AbstractDict, k) = hasfield(d, k) ? getfield(d, k) : haskey(d, k) ? d[k] : d[string(k)]
 Base.getindex(d::AbstractDict, k::Int) = haskey(d, k) ? d[k] : values(d)[k]
 struct Null end
 null = Null()
