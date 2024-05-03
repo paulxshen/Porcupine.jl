@@ -24,11 +24,14 @@ function values(x)
 end
 # Base.values(x::NamedTuple) = collect(x)
 # values(x) = Base.values(x)
-Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
-Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : d[k]
+Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : (haskey(d, k) ? d[k] : d[string(k)])
 
-# Base.getproperty(d::AbstractDict, k) = hasfield(d, k) ? getfield(d, k) : haskey(d, k) ? d[k] : d[string(k)]
-Base.getindex(d::AbstractDict, k::Int) = haskey(d, k) ? d[k] : values(d)[k]
+Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
+_getindex(d::AbstractDict, k::Int) = haskey(d, k) ? d[k] : values(d)[k]
+Base.getindex(d::Dict, k::Int) = _getindex(d, k)
+Base.getindex(d::SortedDict, k::Int) = _getindex(d, k)
+Base.getindex(d::OrderedDict, k::Int) = _getindex(d, k)
+
 struct Null end
 null = Null()
 function _getindex(c, k)
@@ -103,6 +106,7 @@ d2(x) = round.(x, sigdigits=2)
 gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)
 
 Base.round(x::AbstractFloat) = Base.round(Int, x)
+Base.round(a) = Base.round.(a)
 Base.ndims(a) = length(size(a))
 Base.size(x) = (length(x),)
 
