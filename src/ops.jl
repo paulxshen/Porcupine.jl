@@ -26,7 +26,7 @@ end
 # values(x) = Base.values(x)
 Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : (haskey(d, k) ? d[k] : d[string(k)])
 
-Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
+# Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
 _getindex(d::AbstractDict, k::Int) = haskey(d, k) ? d[k] : values(d)[k]
 Base.getindex(d::Dict, k::Int) = _getindex(d, k)
 Base.getindex(d::SortedDict, k::Int) = _getindex(d, k)
