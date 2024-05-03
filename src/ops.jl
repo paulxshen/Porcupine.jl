@@ -34,22 +34,22 @@ Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k
 
 struct Null end
 null = Null()
-function _getindex(c, k)
-    if k in keys(c)
-        return c[k]
-    else
-        for v = values(c)
-            v = _getindex(v, k)
-            if v != null
-                return v
-            end
-        end
-    end
-    null
-end
+# function _getindex(c, k)
+#     if k in keys(c)
+#         return c[k]
+#     else
+#         for v = values(c)
+#             v = _getindex(v, k)
+#             if v != null
+#                 return v
+#             end
+#         end
+#     end
+#     null
+# end
 
-Base.getindex(c::AbstractDict, k::Union{Symbol,String,Number}) = _getindex(c, k)
-Base.getindex(c::NamedTuple, k) = _getindex(c, k)
+# Base.getindex(c::AbstractDict, k::Union{Symbol,String,Number}) = _getindex(c, k)
+# Base.getindex(c::NamedTuple, k) = _getindex(c, k)
 # function dict(T::Type{NamedTuple}, v)
 #     NamedTuple(v)
 # end
