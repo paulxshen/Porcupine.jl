@@ -47,7 +47,8 @@ function _getindex(c, k)
     end
     null
 end
-Base.getindex(c::AbstractDict, k) = _getindex(c, k)
+
+Base.getindex(c::AbstractDict, k::Union{Symbol,String,Number}) = _getindex(c, k)
 Base.getindex(c::NamedTuple, k) = _getindex(c, k)
 # function dict(T::Type{NamedTuple}, v)
 #     NamedTuple(v)
