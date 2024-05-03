@@ -27,10 +27,10 @@ end
 Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : (haskey(d, k) ? d[k] : d[string(k)])
 
 # Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
-_getindex(d::AbstractDict, k::Int) = haskey(d, k) ? d[k] : values(d)[k]
-Base.getindex(d::Dict, k::Int) = _getindex(d, k)
-Base.getindex(d::SortedDict, k::Int) = _getindex(d, k)
-Base.getindex(d::OrderedDict, k::Int) = _getindex(d, k)
+# _getindex(d::AbstractDict, k::Int) = haskey(d, k) ? d[k] : values(d)[k]
+# Base.getindex(d::Dict, k::Int) = _getindex(d, k)
+# Base.getindex(d::SortedDict, k::Int) = _getindex(d, k)
+# Base.getindex(d::OrderedDict, k::Int) = _getindex(d, k)
 
 struct Null end
 null = Null()
