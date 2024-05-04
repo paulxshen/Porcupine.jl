@@ -4,14 +4,18 @@ using DataStructures, ChainRulesCore, LinearAlgebra
 # (f::Any)(a...; kw...) = f.(a...; kw...)
 # (f::typeof(+))(x::Int)=1
 
-Numberlike = Union{Tuple,AbstractArray,Number}
-LinearAlgebra.dot(x::Numberlike, y::Numberlike) = sum(x .* y)
-Base.:-(x::Numberlike, y::Numberlike) = x .- y
-Base.:+(x::Numberlike, y::Numberlike) = x .+ y
-Base.:*(x::Number, y::Numberlike) = x .* y
-Base.:*(x::Numberlike, y::Number) = x .* y
-Base.:/(x::Number, y::Numberlike) = x ./ y
-Base.:/(x::Numberlike, y::Number) = x ./ y
+Dictlike = Union{AbstractDict,NamedTuple}
+List = Union{AbstractArray,AbstractSet,Tuple}
+Collection = Union{List,Dictlike}
+Numeric = Union{List,Number}
+
+LinearAlgebra.dot(x::Numeric, y::Numeric) = sum(x .* y)
+Base.:-(x::Numeric, y::Numeric) = x .- y
+Base.:+(x::Numeric, y::Numeric) = x .+ y
+Base.:*(x::Number, y::Numeric) = x .* y
+Base.:*(x::Numeric, y::Number) = x .* y
+Base.:/(x::Number, y::Numeric) = x ./ y
+Base.:/(x::Numeric, y::Number) = x ./ y
 
 function keys(x)
     ignore_derivatives() do
@@ -70,7 +74,6 @@ function dict(v)
     dict(OrderedDict{Symbol,Any}, v)
 end
 
-Dictlike = Union{AbstractDict,NamedTuple}
 Ops = Union{typeof.((+, -, *, /))...}
 # dmul(a, b) = [a .* b for (a, b) = zip(values(a), values(b))]
 # Base.broadcast(f, d::Dictlike) = [f(d[k]) for k = keys(d)]
@@ -114,5 +117,6 @@ Base.size(x) = (length(x),)
 Base.getindex(s::Symbol, i) = Symbol(String(s)[i])
 
 Base.convert(T, x) = convert.(T, x)
-Base.Float16(x::Numberlike) = Float16.(x)
-Base.Float32(x::Numberlike) = Float32.(x)
+Base.Float16(x::List) = Float16.(x)
+Base.Float32(x::List) = Float32.(x)
+Base.Float64(x::List) = Float64.(x)
