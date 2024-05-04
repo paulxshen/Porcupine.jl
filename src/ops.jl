@@ -1,4 +1,4 @@
-using DataStructures, ChainRulesCore, LinearAlgebra
+using DataStructures, LinearAlgebra, Flux
 
 # Base.map(f, c::AbstractSet) = f.(c)
 # (f::Any)(a...; kw...) = f.(a...; kw...)
@@ -117,6 +117,6 @@ Base.size(x) = (length(x),)
 Base.getindex(s::Symbol, i) = Symbol(String(s)[i])
 
 Base.convert(T, x) = convert.(T, x)
-Base.Float16(x::List) = Float16.(x)
-Base.Float32(x::List) = Float32.(x)
-Base.Float64(x::List) = Float64.(x)
+Base.Float16(x::Collection) = f16(x)
+Base.Float32(x::Collection) = f32(x)
+# Base.Float64(x::List) = f64(x)
