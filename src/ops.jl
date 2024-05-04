@@ -112,3 +112,7 @@ Base.ndims(a) = length(size(a))
 Base.size(x) = (length(x),)
 
 Base.getindex(s::Symbol, i) = Symbol(String(s)[i])
+
+Base.convert(T, x) = convert.(T, x)
+Base.Float16(x::Numberlike) = Float16.(x)
+Base.Float32(x::Numberlike) = Float32.(x)
