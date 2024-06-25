@@ -1,4 +1,3 @@
-VF = Union{AbstractVector{<:AbstractArray},Tuple,AbstractDict,NamedTuple}
 
 struct StaggeredDel
     Δ::AbstractArray
@@ -30,7 +29,8 @@ function sdiff(a, ; dims, cd=false)
     v = shifts[dims]
 
     if v == 1
-        return a - circshift(a, select)
+        # return a - circshift(a, select)
+        cat(selectdim(a, dims, 1:1), diff(a; dims), dims=dims)
     elseif v == -1
         return circshift(a, -select) - a
     elseif left(a)[dims] == 1
@@ -103,25 +103,14 @@ function (m::StaggeredDel)(a, p=*)
         end
     end
 end
+
 function (m::Laplacian)(a)
     sum([lap(a, dims=i) * Δ for (i, Δ) = zip(m.Δ)])
 end
 function (m::Laplacian)(v::VF)
     m.(a)
 end
-function LinearAlgebra.cross(a::VF, b::VF)
-    if length(a) == length(b) == 3
-        u, v, w = b
-        x, y, z = a
-        return [w .* y - v .* z, u .* z - w .* x, v .* x - u .* y]
-    elseif length(a) == 1 && length(b) == 2
-        z, = a
-        u, v, = b
-        return [-v .* z, u .* z,]
-    elseif length(a) == 2 && length(b) == 1
-        return -b × a
-    end
-end
+
 function LinearAlgebra.dot(m::Del, a)
     m(a, dot)
 end
@@ -129,5 +118,4 @@ end
 function LinearAlgebra.cross(m::Del, a)
     m(a, cross)
 end
-
 
