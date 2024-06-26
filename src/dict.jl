@@ -16,7 +16,6 @@ values(x) = Base.values(x)
 
 # Base.values(x::AbstractDict) = values(x)
 
-Base.getindex(d::NamedTuple, i::Int) = values(d)[i]
 Base.getindex(d::NamedTuple, i::CartesianIndex) = values(d)[i]
 
 function flatten(d::Dictlike)

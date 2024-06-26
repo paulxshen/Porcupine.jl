@@ -1,5 +1,5 @@
 using DataStructures, LinearAlgebra
-using ChainRulesCore
+using ChainRulesCore, StatsBase
 
 include("ops.jl")
 include("dict.jl")
