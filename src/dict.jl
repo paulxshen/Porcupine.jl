@@ -29,6 +29,7 @@ function approx_getindex(d, k)
     end
     error("Key not found even approximately")
 end
+Base.haskey(a::NamedTuple, k::String) = false
 
 struct Null end
 null = Null()
