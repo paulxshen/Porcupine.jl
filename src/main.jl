@@ -1,3 +1,6 @@
+using DataStructures, LinearAlgebra
+using ChainRulesCore
+
 include("ops.jl")
 include("dict.jl")
 include("vf.jl")

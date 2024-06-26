@@ -136,7 +136,6 @@ Base.:/(x::Dictlike, y) = _f(/, x, y)
 Base.:/(x::Dictlike, y::Dictlike) = _f(/, x, y)
 Base.:/(x, y::Dictlike) = _f((x, y) -> y / x, y, x)
 
-using ChainRulesCore
 # ZeroTangent
 Base.:+(x::ZeroTangent, y::Dictlike) = y
 Base.:+(x::Dictlike, y::ZeroTangent) = x
