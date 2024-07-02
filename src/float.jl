@@ -13,3 +13,7 @@ Base.Float64(x::Complex) = ComplexF64(x)
 Base.Float16(x::Str) = parse(Float16, string(x))
 Base.Float32(x::Str) = parse(Float32, string(x))
 Base.Float64(x::Str) = parse(Float64, string(x))
+
+Base.Float16(d::Dictlike) = apply(Float16, d)
+Base.Float32(d::Dictlike) = apply(Float32, d)
+Base.Float64(d::Dictlike) = apply(Float64, d)
