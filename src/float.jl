@@ -1,6 +1,3 @@
-Base.Float16(x::Dictlike) = f16(x)
-Base.Float32(x::Dictlike) = f32(x)
-
 Base.Float16(x::List) = Float16.(x)
 Base.Float32(x::List) = Float32.(x)
 Base.Float64(x::List) = Float64.(x)
