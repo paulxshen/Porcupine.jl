@@ -14,6 +14,10 @@ Base.Float16(x::Str) = parse(Float16, string(x))
 Base.Float32(x::Str) = parse(Float32, string(x))
 Base.Float64(x::Str) = parse(Float64, string(x))
 
-Base.Float16(d::Dictlike) = apply(Float16, d)
-Base.Float32(d::Dictlike) = apply(Float32, d)
-Base.Float64(d::Dictlike) = apply(Float64, d)
+f16(x) = Float16(x)
+f32(x) = Float32(x)
+f64(x) = Float64(x)
+
+Base.Float16(d::Dictlike) = apply(f16, d)
+Base.Float32(d::Dictlike) = apply(f32, d)
+Base.Float64(d::Dictlike) = apply(f64, d)
