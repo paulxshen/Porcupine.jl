@@ -140,10 +140,19 @@ Base.:/(x, y::Dictlike) = _f((x, y) -> y / x, y, x)
 Base.:+(x::ZeroTangent, y::Dictlike) = y
 Base.:+(x::Dictlike, y::ZeroTangent) = x
 
-function apply_func(f, d::Dictlike)
-    dict([k => isa(d[k], Dictlike) ? apply(f, d[k]) : f(d[k]) for k in keys(d)])
-    
+fmap(f, x::Number) = f(x)
+function fmap(f, d::Dictlike)
+    dict([k => fmap(f, d[k]) for k in keys(d)])
 end
+
+function fmap(f, x)
+    if isempty(propertynames(x))
+        return f(x)
+    end
+    xs, re = functor(x)
+    re(fmap.((f,), xs))
+end
+
 function apply(f::Function, d::Dictlike)
-    apply_func(f, d)
+    fmap(f, d)
 end

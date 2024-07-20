@@ -1,4 +1,5 @@
-using DataStructures, LinearAlgebra, Statistics, UnPack
+using DataStructures, LinearAlgebra, Statistics, UnPack, Functors
+using Functors: functor
 using Zygote, ChainRulesCore
 using ArrayPadding
 using Zygote: Buffer
