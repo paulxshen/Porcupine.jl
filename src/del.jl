@@ -1,9 +1,9 @@
 
 struct StaggeredDel
     Δ::AbstractArray
-
-    function StaggeredDel(Δ::AbstractArray)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
-        new(Δ,)
+    autodiff::Bool
+    function StaggeredDel(Δ::AbstractArray; autodiff=true)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
+        new(Δ, autodiff)
     end
 end
 # @functor StaggeredDel
@@ -22,17 +22,32 @@ function cdiff(a::AbstractArray, ; dims,)
     diff(a; dims)
 end
 
-function sdiff(a, ; dims, cd=false)
+function sdiff(a, ; dims, autodiff=true)
     select = 1:ndims(a) .== dims
     shifts = right(a) - left(a)
     a = Array(a)
     v = shifts[dims]
 
     if v == 1
-        # return a - circshift(a, select)
-        cat(selectdim(a, dims, 1:1), diff(a; dims), dims=dims)
+        if autodiff
+            return a - circshift(a, select)
+        else
+            # b = Buffer(a)
+            b = similar(a)
+            b[[i == 0 ? (:) : 2:(size(a, dims)) for i = select]...] = diff(a; dims)
+            # return copy(b)
+            # cat(selectdim(a, dims, 1:1), diff(a; dims), dims=dims)
+            return b
+        end
     elseif v == -1
-        return circshift(a, -select) - a
+        if autodiff
+            return circshift(a, -select) - a
+        else
+            b = similar(a)
+            b[[i == 0 ? (:) : 1:(size(a, dims)-1) for i = select]...] = diff(a; dims)
+            return b
+            # return copy(b)
+        end
     elseif left(a)[dims] == 1
         return diff(a; dims)
     elseif left(a)[dims] == 0
@@ -61,51 +76,53 @@ function sdiff(a, ; dims, cd=false)
 end
 
 function (m::Del)(a::AbstractArray{<:Number}, p=*)
-    n = length(m.Δ)
+    @unpack Δ, autodiff = m
+    n = length(Δ)
     if n == 1
-        return pdiff(a) / m.Δ[1]
+        return pdiff(a) / Δ[1]
     end
 
     I = [ax[begin:end-1] for ax = axes(a)[1:n]]
     if p == *
-        return [pdiff(a, dims=i) for i = 1:n] ./ m.Δ
+        return [pdiff(a, dims=i) for i = 1:n] ./ Δ
     elseif p == cross
-        dx, dy = m.Δ
+        dx, dy = Δ
     end
 end
 
 function (m::StaggeredDel)(a, p=*)
+    @unpack Δ, autodiff = m
     a = a |> values
-    n = length(m.Δ)
+    n = length(Δ)
     # I = [ax[begin:end-1] for ax = axes(first(a))]
     if p == dot
-        return sum([pdiff(a[i], dims=i) for i = 1:n] ./ m.Δ)
+        return sum([pdiff(a[i], dims=i) for i = 1:n] ./ Δ)
     elseif p == cross
         if n == 2
-            dx, dy = m.Δ
+            dx, dy = Δ
             if length(a) == 1
                 u, = a
-                return [sdiff(u, dims=2) / dy, -sdiff(u, dims=1) / dx]
+                return [sdiff(u; autodiff, dims=2) / dy, -sdiff(u; autodiff, dims=1) / dx]
             else
                 u, v = a
-                return [sdiff(v, dims=1) / dx - sdiff(u, dims=2) / dy]
+                return [sdiff(v; autodiff, dims=1) / dx - sdiff(u; autodiff, dims=2) / dy]
             end
         elseif n == 3
-            dx, dy, dz = m.Δ
+            dx, dy, dz = Δ
             u, v, w = a
-            uy = sdiff(u, dims=2) / dy
-            uz = sdiff(u, dims=3) / dz
-            vx = sdiff(v, dims=1) / dx
-            vz = sdiff(v, dims=3) / dz
-            wx = sdiff(w, dims=1) / dx
-            wy = sdiff(w, dims=2) / dy
+            uy = sdiff(u; autodiff, dims=2) / dy
+            uz = sdiff(u; autodiff, dims=3) / dz
+            vx = sdiff(v; autodiff, dims=1) / dx
+            vz = sdiff(v; autodiff, dims=3) / dz
+            wx = sdiff(w; autodiff, dims=1) / dx
+            wy = sdiff(w; autodiff, dims=2) / dy
             return [wy - vz, uz - wx, vx - uy]
         end
     end
 end
 
 function (m::Laplacian)(a)
-    sum([lap(a, dims=i) * Δ for (i, Δ) = zip(m.Δ)])
+    sum([lap(a, dims=i) * Δ for (i, Δ) = zip(Δ)])
 end
 function (m::Laplacian)(v::VF)
     m.(a)
