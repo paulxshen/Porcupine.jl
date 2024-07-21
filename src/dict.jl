@@ -145,11 +145,14 @@ function fmap(f, d::Dictlike)
     dict([k => fmap(f, d[k]) for k in keys(d)])
 end
 
-function fmap(f, x)
-    if isempty(propertynames(x))
+# function fmap(f, x::T, types=[]) where {T}
+function fmap(f, x::T) where {T}
+    # if isempty(propertynames(x)) || T in types
+    if isempty(propertynames(x)) || T <: AbstractArray
         return f(x)
     end
     xs, re = functor(x)
+    # re(fmap.((f,), xs, (types,)))
     re(fmap.((f,), xs))
 end
 
