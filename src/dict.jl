@@ -17,9 +17,10 @@ values(x) = Base.values(x)
 # Base.values(x::AbstractDict) = values(x)
 
 Base.getindex(d::NamedTuple, i::CartesianIndex) = values(d)[i]
-
-function flatten(d::Dictlike)
-    merge([isa(v, Dictlike) ? flatten(v) : dict([k => v]) for (k, v) in pairs(d)]...)
+leaves(x) = [x]
+function leaves(d::Dictlike)
+    # dict([k => leaves(d[k]) for k in keys(d)])
+    reduce(vcat, leaves.(values(d)))
 end
 function approx_getindex(d, k)
     for _k in keys(d)
