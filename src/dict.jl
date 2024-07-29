@@ -142,6 +142,8 @@ Base.:+(x::ZeroTangent, y::Dictlike) = y
 Base.:+(x::Dictlike, y::ZeroTangent) = x
 
 fmap(f, x::Number) = f(x)
+fmap(f, x::AbstractArray{<:Number}) = f(x)
+fmap(f, x::AbstractArray) = fmap.((f,), x)
 function fmap(f, d::Dictlike)
     dict([k => fmap(f, d[k]) for k in keys(d)])
 end
@@ -149,7 +151,7 @@ end
 # function fmap(f, x::T, types=[]) where {T}
 function fmap(f, x::T) where {T}
     # if isempty(propertynames(x)) || T in types
-    if isempty(propertynames(x)) || T <: AbstractArray
+    if isempty(propertynames(x))
         return f(x)
     end
     xs, re = functor(x)

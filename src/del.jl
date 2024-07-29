@@ -26,28 +26,50 @@ function sdiff(a, ; dims, autodiff=true)
     select = 1:ndims(a) .== dims
     shifts = right(a) - left(a)
     a = Array(a)
+    T = typeof(a)
     v = shifts[dims]
+    n = size(a, dims)
+    zsz = collect(size(a))
+    ignore_derivatives() do
+        zsz[dims] = 1
+        zsz = tuple(zsz...)
+    end
 
     if v == 1
-        if autodiff
-            return a - circshift(a, select)
-        else
-            # b = Buffer(a)
-            b = similar(a)
-            b[[i == 0 ? (:) : 2:(size(a, dims)) for i = select]...] = diff(a; dims)
-            # return copy(b)
-            # cat(selectdim(a, dims, 1:1), diff(a; dims), dims=dims)
-            return b
-        end
+
+        # b = T(zeros(size(a)))
+        b = Buffer(a)
+        i = [s ? (2:n) : (:) for s = select]
+        b[i...] = diff(a; dims)
+        i = [s ? (1:1) : (:) for s = select]
+        b[i...] = T(zeros(zsz))
+        return copy(b)
+        # if autodiff
+        #     return a - circshift(a, select)
+        # else
+        #     # b = Buffer(a)
+        #     b = similar(a)
+        #     b[[i == 0 ? (:) : 2:(size(a, dims)) for i = select]...] = diff(a; dims)
+        #     # return copy(b)
+        #     # cat(selectdim(a, dims, 1:1), diff(a; dims), dims=dims)
+        #     return b
+        # end
     elseif v == -1
-        if autodiff
-            return circshift(a, -select) - a
-        else
-            b = similar(a)
-            b[[i == 0 ? (:) : 1:(size(a, dims)-1) for i = select]...] = diff(a; dims)
-            return b
-            # return copy(b)
-        end
+        # b = T(zeros(size(a)))
+        b = Buffer(a)
+        i = [s ? (1:n-1) : (:) for s = select]
+        b[i...] = diff(a; dims)
+        i = [s ? (n:n) : (:) for s = select]
+        b[i...] = T(zeros(zsz))
+        return copy(b)
+        # if autodiff
+        #     return circshift(a, -select) - a
+        # else
+        #     b = similar(a)
+        #     b[[i == 0 ? (:) : 1:(size(a, dims)-1) for i = select]...] = diff(a; dims)
+        #     return b
+        #     # return copy(b)
+        # end
     elseif left(a)[dims] == 1
         return diff(a; dims)
     elseif left(a)[dims] == 0
