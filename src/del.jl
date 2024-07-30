@@ -38,12 +38,13 @@ function sdiff(a, ; dims, autodiff=true)
     if v == 1
 
         # b = T(zeros(size(a)))
-        b = Buffer(a)
+        b = autodiff ? Buffer(a) : similar(a)
         i = [s ? (2:n) : (:) for s = select]
         b[i...] = diff(a; dims)
         i = [s ? (1:1) : (:) for s = select]
         b[i...] = T(zeros(zsz))
-        return copy(b)
+        autodiff && return copy(b)
+        return b
         # if autodiff
         #     return a - circshift(a, select)
         # else
@@ -56,12 +57,13 @@ function sdiff(a, ; dims, autodiff=true)
         # end
     elseif v == -1
         # b = T(zeros(size(a)))
-        b = Buffer(a)
+        b = autodiff ? Buffer(a) : similar(a)
         i = [s ? (1:n-1) : (:) for s = select]
         b[i...] = diff(a; dims)
         i = [s ? (n:n) : (:) for s = select]
         b[i...] = T(zeros(zsz))
-        return copy(b)
+        autodiff && return copy(b)
+        return b
         # if autodiff
         #     return circshift(a, -select) - a
         # else
