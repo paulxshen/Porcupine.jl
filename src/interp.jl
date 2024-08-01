@@ -1,7 +1,9 @@
 function interp(a, i)
     p = floor(i)
     q = ceil(i)
-    sum([a[j...] * prod(1 - abs.(i - j)) for j = Base.product(zip(p, q)...)])
+    # sum([a[j...] * prod(1 - abs.(i - j)) for j = Base.product(zip(p, q)...)])
+    # sum([a[j...] * prod(1 - abs.(i - j)) for j = Base.product([unique((p[i], q[i])) for i = 1:length(i)]...)])
+    sum([a[j...] * prod(1 - abs.(i - j)) for j = Base.product([p[i] == q[i] ? (p[i],) : (p[i], q[i]) for i = 1:length(i)]...)])
 end
 # Base.getindex(a::AbstractArray, i...) = interp(a, i)
 Base.getindex(a::AbstractArray, i::AbstractFloat) = interp(a, [i])
