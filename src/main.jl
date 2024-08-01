@@ -12,3 +12,6 @@ include("float.jl")
 include("misc.jl")
 include("del.jl")
 include("nan.jl")
+include("interp.jl")
+# a = [2, 3, 4]
+# a[1.5]

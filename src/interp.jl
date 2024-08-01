@@ -1,0 +1,10 @@
+function interp(a, i)
+    p = floor(i)
+    q = ceil(i)
+    sum([a[j...] * prod(1 - abs.(i - j)) for j = Base.product(zip(p, q)...)])
+end
+# Base.getindex(a::AbstractArray, i...) = interp(a, i)
+Base.getindex(a::AbstractArray, i::AbstractFloat) = interp(a, [i])
+Base.getindex(a::AbstractArray, i::AbstractFloat, j::AbstractFloat) = interp(a, [i, j])
+Base.getindex(a::AbstractArray, i::AbstractFloat, j::AbstractFloat, k::AbstractFloat) = interp(a, [i, j, k])
+Base.getindex(a::AbstractArray, v::AbstractVector{<:AbstractFloat}) = interp(a, v)
