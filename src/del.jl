@@ -38,16 +38,18 @@ function sdiff(a, ; dims, autodiff=true)
 
     if v == 1
 
-        # b = T(zeros(size(a)))
-        return cat(z, diff(a, ; dims), dims=dims)
+        if autodiff
+            return cat(z, diff(a, ; dims), dims=dims)
 
-        # if autodiff
+        else
+            b = T(zeros(size(a)))
+            i = [s ? (2:n) : (:) for s = select]
+            b[i...] = diff(a; dims)
+            return b
+        end
         #     # b = a - circshift(a, select)
         #     # b = cat(z, selectdim(b, dims, 2:n), dims=dims)
-        # else
         #     b = autodiff ? Buffer(a) : similar(a)
-        #     i = [s ? (2:n) : (:) for s = select]
-        #     b[i...] = diff(a; dims)
         #     i = [s ? (1:1) : (:) for s = select]
         #     b[i...] = z
         # end
@@ -61,20 +63,21 @@ function sdiff(a, ; dims, autodiff=true)
         #     return b
         # end
     elseif v == -1
-        return cat(diff(a; dims), z, dims=dims)
-        # b = T(zeros(size(a)))
-        # if autodiff
+        if autodiff
+            return cat(diff(a; dims), z, dims=dims)
+        else
+            b = T(zeros(size(a)))
+            i = [s ? (1:n-1) : (:) for s = select]
+            b[i...] = diff(a; dims)
+            return b
+        end
         #     b = circshift(a, -select) - a
         #     b = cat(selectdim(b, dims, 1:n-1), z, dims=dims)
-        # else
         #     b = autodiff ? Buffer(a) : similar(a)
-        #     i = [s ? (1:n-1) : (:) for s = select]
-        #     b[i...] = diff(a; dims)
         #     i = [s ? (n:n) : (:) for s = select]
         #     b[i...] = z
         # end
         # # autodiff && return copy(b)
-        # return b
         #     b = similar(a)
         #     b[[i == 0 ? (:) : 1:(size(a, dims)-1) for i = select]...] = diff(a; dims)
         #     return b
