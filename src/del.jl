@@ -25,7 +25,7 @@ end
 function sdiff(a, ; dims, autodiff=true)
     select = 1:ndims(a) .== dims
     shifts = right(a) - left(a)
-    a = collect(a)
+    a = array(a)
     T = typeof(a)
     v = shifts[dims]
     n = size(a, dims)
@@ -34,25 +34,28 @@ function sdiff(a, ; dims, autodiff=true)
         zsz[dims] = 1
         zsz = tuple(zsz...)
     end
-    _zeros = parentmodule(T).zeros
-    z = _zeros(zsz)
+    if autodiff
+        z = T(zeros(zsz))
+    else
+        _zeros = parentmodule(T).zeros
+        z = _zeros(zsz)
+    end
 
     if v == 1
 
-        # if autodiff
-        #     return cat(z, diff(a, ; dims), dims=dims)
-
-        # else
+        if autodiff
+            return cat(z, diff(a, ; dims), dims=dims)
+        else
             # b = T(zeros(size(a)))
-            # b = similar(a)
-            b =autodiff ? Buffer(a) : similar(a)
+            b = similar(a)
+            # b = autodiff ? Buffer(a) : similar(a)
             i = [s ? (2:n) : (:) for s = select]
             b[i...] = diff(a; dims)
             i = [s ? (1:1) : (:) for s = select]
             b[i...] = z
-            autodiff && return copy(b)
+            # autodiff && return copy(b)
             return b
-        # end
+        end
         #     # b = a - circshift(a, select)
         #     # b = cat(z, selectdim(b, dims, 2:n), dims=dims)
         #     b = autodiff ? Buffer(a) : similar(a)
@@ -66,19 +69,19 @@ function sdiff(a, ; dims, autodiff=true)
         #     return b
         # end
     elseif v == -1
-        # if autodiff
-        #     return cat(diff(a; dims), z, dims=dims)
-        # else
+        if autodiff
+            return cat(diff(a; dims), z, dims=dims)
+        else
             # b = T(zeros(size(a)))
-            # b = similar(a)
-            b =autodiff ? Buffer(a) : similar(a)
+            b = similar(a)
+            # b = autodiff ? Buffer(a) : similar(a)
             i = [s ? (1:n-1) : (:) for s = select]
             b[i...] = diff(a; dims)
             i = [s ? (n:n) : (:) for s = select]
             b[i...] = z
-            autodiff && return copy(b)
+            # autodiff && return copy(b)
             return b
-        # end
+        end
         #     b = circshift(a, -select) - a
         #     b = cat(selectdim(b, dims, 1:n-1), z, dims=dims)
         #     b = autodiff ? Buffer(a) : similar(a)
