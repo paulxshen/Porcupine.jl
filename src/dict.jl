@@ -16,7 +16,7 @@ values(x) = Base.values(x)
 
 # Base.values(x::AbstractDict) = values(x)
 
-Base.getindex(d::NamedTuple, i::CartesianIndex) = values(d)[i]
+# Base.getindex(d::NamedTuple, i::CartesianIndex) = values(d)[i]
 leaves(x) = [x]
 function leaves(d::Dictlike)
     # dict([k => leaves(d[k]) for k in keys(d)])
@@ -73,16 +73,10 @@ function _getindex(d, k)
     end
 end
 
-Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : _getindex(d, k)
+Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : getindex(d, k)
 (d::Dictlike)(k) = _getindex(d, k)
 # Base.getproperty(a::AbstractArray, k::Symbol) = hasproperty(a, k) ? getfield(a, k) : getproperty.(a, k)
 # (haskey(d, k) ? d[k] : d[string(k)])
-Base.getindex(c::Dictlike, k, opt::Union{Symbol,String}) =
-    if opt == :r
-        recursive_getindex(c, k)
-    else
-        c[k]
-    end
 
 function dict(v)
     r = OrderedDict()
