@@ -5,18 +5,12 @@ function keys(d)
         collect(Base.keys(d))
     end
 end
-# keys(x) = [k for k in Base.keys(x)]
-# function values(x::AbstractDict)
-#     [x[k] for k = keys(x)]
-# end
+
 values(x::NamedTuple) = collect(x)
 values(x::Base.RefValue) = x[]
 values(d::AbstractDict) = [d[k] for k = keys(d)]
 values(x) = Base.values(x)
 
-# Base.values(x::AbstractDict) = values(x)
-
-# Base.getindex(d::NamedTuple, i::CartesianIndex) = values(d)[i]
 leaves(x) = [x]
 function leaves(d::Dictlike)
     # dict([k => leaves(d[k]) for k in keys(d)])
@@ -30,19 +24,20 @@ function approx_getindex(d, k)
     end
     error("Key not found even approximately")
 end
+
+
 Base.haskey(a::NamedTuple, k::String) = false
 
 struct Null end
 null = Null()
-function recursive_getindex(c, k)
-    if k in keys(c)
-        return c[k]
-    elseif isa(c, Dictlike)
-        for v = values(c)
-            v = recursive_getindex(v, k)
-            if v != null
-                return v
-            end
+
+recursive_getindex(d, k) = null
+function recursive_getindex(d::Dictlike, k)
+    haskey(d, k) && return d[k]
+    for v = values(d)
+        v = recursive_getindex(v, k)
+        if v != null
+            return v
         end
     end
     null
@@ -52,31 +47,30 @@ function _getindex(d, k)
     if haskey(d, k)
         return d[k]
     end
-    if haskey(d, string(k))
-        return d[string(k)]
-    end
-    if haskey(d, Symbol(k))
-        return d[Symbol(k)]
-    end
-
-    if isa(k, Integer) && k > 0
-        return values(d)[k]
-    end
-
-    r = recursive_getindex(d, k)
-    if r != null
-        return r
-    end
-    r = recursive_getindex(d, string(k))
-    if r != null
-        return r
-    end
 end
 
 Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : getindex(d, k)
-(d::Dictlike)(k) = _getindex(d, k)
-# Base.getproperty(a::AbstractArray, k::Symbol) = hasproperty(a, k) ? getfield(a, k) : getproperty.(a, k)
-# (haskey(d, k) ? d[k] : d[string(k)])
+
+function (d::Dictlike)(k::Int)
+    haskey(d, k) && return d[k]
+
+    if k > 0
+        return values(d)[k]
+    end
+end
+
+function (d::Dictlike)(k::Symbol)
+    r = recursive_getindex(d, k)
+    r != null && return r
+    recursive_getindex(d, string(k))
+end
+
+function (d::Dictlike)(k::String)
+    r = recursive_getindex(d, k)
+    r != null && return r
+    recursive_getindex(d, Symbol(k))
+end
+
 
 function dict(v)
     r = OrderedDict()
@@ -88,7 +82,8 @@ end
 
 
 function dict(v::NamedTuple)
-    dict(pairs(v))
+    # dict(pairs(v))
+    v
 end
 
 Ops = Union{typeof.((+, -, *, /))...}
@@ -98,8 +93,6 @@ Base.broadcastable(x::OrderedDict) = values(x)
 Base.broadcastable(x::NamedTuple) = collect(x)
 
 _f(f, x::Dictlike, y,) = dict(broadcast(keys(x), values(y)) do k, v
-    global aa = x
-    global bb = y
     k => begin
         if isa(x[k], Dictlike)
             f(x[k], v)
@@ -108,7 +101,6 @@ _f(f, x::Dictlike, y,) = dict(broadcast(keys(x), values(y)) do k, v
         end
     end
 end)
-# _f(f, x::Dictlike, y,) = dict(Pair.(keys(x), ((a, b) -> isa(a, Dictlike) ? f(a, b) : f.(a, b)).(values(x), values(y))))
 Base.:+(x::Dictlike, y) = _f(+, x, y)
 function Base.:+(x::Dictlike, y::Dictlike)
     if isempty(x)
