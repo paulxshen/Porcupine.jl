@@ -5,8 +5,11 @@ using ArrayPadding
 using Zygote: Buffer
 # using ArrayPadding:
 
+include("ad.jl")
 include("ops.jl")
 include("dict.jl")
+include("string.jl")
+include("dictitrs.jl")
 include("vf.jl")
 include("float.jl")
 include("misc.jl")

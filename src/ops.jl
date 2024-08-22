@@ -14,10 +14,15 @@ Base.:*(x, y) = x .* y
 Base.:/(x, y) = x ./ y
 
 Base.:-(x) = 0 - x
-Base.:+(x::All, y::Nothing) = x
-Base.:+(x::Nothing, y::All) = y
-Base.:+(x::Dictlike, y::Nothing) = x
+
+Base.:+(x, y::Nothing) = x
+Base.:+(x::Nothing, y) = y
 Base.:+(x::Nothing, y::Nothing) = nothing
+
+Base.:-(x, y::Nothing) = x
+Base.:-(x::Nothing, y) = -y
+Base.:-(x::Nothing, y::Nothing) = nothing
+
 Base.:*(x, y::Nothing) = nothing
 Base.:*(x::Nothing, y) = nothing
 Base.:*(x::Nothing, y::Nothing) = nothing

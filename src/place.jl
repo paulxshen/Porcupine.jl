@@ -23,7 +23,7 @@ end
 #     copy(buf)
 # end
 function place!(a, o, b)
-    a[[i:j for (i, j) = zip(o, o .+ size(b) .- 1)]...] = b
+    a[range.(o, o .+ size(b) .- 1)...] = b
     a
 end
 

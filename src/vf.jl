@@ -1,10 +1,11 @@
-VF = Union{AbstractVector{<:AbstractArray},Tuple,AbstractDict,NamedTuple,Base.RefValue}
+VF = Union{AbstractVector{<:AbstractArray},Dictlike}
+# Tuple,AbstractDict,NamedTuple,Base.RefValue}
 
 # vfmul(a, b) = a.(.*)b
-vfmul(a, b) = broadcast(.*, a, b)
-Base.:*(a::VF, b::VF) = broadcast(.*, a, b)
-Base.:*(a::VF, b::Dictlike) = broadcast(.*, a, values(b))
-Base.:*(a::Dictlike, b::VF) = broadcast(.*, values(a), b)
+# vfmul(a, b) = broadcast(.*, a, b)
+# Base.:*(a::VF, b::VF) = broadcast(.*, a, b)
+# Base.:*(a::VF, b::Dictlike) = broadcast(.*, a, values(b))
+# Base.:*(a::Dictlike, b::VF) = broadcast(.*, values(a), b)
 # Base.:+(a::VF, b::AbstractArray) = a .+ [b]
 # Base.:+(a::AbstractArray, b::VF) = [a] .+ b
 # Base.:*(a::VF, b::AbstractArray) = a * [b]
