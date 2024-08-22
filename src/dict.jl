@@ -93,35 +93,45 @@ Base.broadcastable(x::NamedTuple) = collect(x)
 _T(T) = T
 _T(::Type{T}) where {T<:NamedTuple} = namedtuple
 
-_f(f, x::T, y) where {T<:Dictlike} = _T(T)(broadcast(keys(x), values(y)) do k, v
-    k => begin
-        if isa(x[k], Dictlike)
-            f(x[k], v)
-        else
-            f.(x[k], v)
+_f_by_val(f, x, y) =
+    broadcast(keys(x), values(y)) do k, v
+        k => begin
+            if isa(x[k], Dictlike)
+                f(x[k], v)
+            else
+                f.(x[k], v)
+            end
         end
     end
-end)
 
-_fk(f, x::T, y) where {T} = _T(T)(map(keys(x)) do k
-    k => begin
-        if isa(x[k], Dictlike)
-            f(x[k], y[k])
-        else
-            f.(x[k], y[k])
+_f_by_key(f, x, y) =
+    map(keys(x)) do k
+        k => begin
+            if isa(x[k], Dictlike)
+                f(x[k], y[k])
+            else
+                f.(x[k], y[k])
+            end
         end
     end
-end)
 
-function _f(f, x::T, y::S) where {T<:Dictlike,S<:Dictlike}
+
+function _f2(T, f, x, y)
     if issubset(keys(y), keys(x))
-        return _fk(f, x, y)
+        return T(_f_by_key(f, x, y))
     end
     if issubset(keys(x), keys(y))
-        return _fk((x, y) -> f(y, x), y, x)
+        return T(_f_by_key((x, y) -> f(y, x), y, x))
     end
-    _f(f, x, values(y))
+    # println(keys(x))
+    # println(keys(y))
+    T(_f_by_val(f, x, values(y)))
 end
+
+_f(f, x::T, y) where {T<:NamedTuple} = namedtuple(_f_by_val(f, x, y))
+_f(f, x::T, y) where {T<:AbstractDict} = dict(_f_by_val(f, x, y))
+_f(f, x::T, y::S) where {T<:NamedTuple,S<:Dictlike} = _f2(namedtuple, f, x, y)
+_f(f, x::T, y::S) where {T<:AbstractDict,S<:Dictlike} = _f2(dict, f, x, y)
 
 # function Base.:+(x::Dictlike, y::Dictlike)
 #     if isempty(x)
@@ -133,7 +143,7 @@ end
 
 Base.:+(x::T, y) where {T<:Dictlike} = _f(+, x, y)
 Base.:+(x, y::T) where {T<:Dictlike} = y + x
-Base.:+(x::S, y::T) where {S<:Dictlike,T<:Dictlike} = _f(S, +, x, y)
+Base.:+(x::S, y::T) where {S<:Dictlike,T<:Dictlike} = _f(+, x, y)
 
 Base.:*(x::T, y) where {T<:Dictlike} = _f(*, x, y)
 Base.:*(x, y::T) where {T<:Dictlike} = y * x
@@ -200,10 +210,10 @@ function ChainRulesCore.rrule(::typeof(namedtuple), ps)
     return y, NamedTuple_pullback
 end
 
-function ChainRulesCore.rrule(::typeof(Pair), a::Symbol, b)
+function ChainRulesCore.rrule(::typeof(Pair), a::Symbol, b::AbstractArray)
     y = Pair(a, b)
     function Pair_pullback(ȳ)
-        NoTangent(), NoTangent(), ȳ[2]
+        NoTangent(), ȳ[1], ȳ[2]
     end
     return y, Pair_pullback
 end
@@ -224,13 +234,13 @@ group(d, k) = namedtuple([_k => d[_k] for _k in keys(d) if startswith(string(_k)
 #     end
 #     return y, namedtuple_pullback
 # end
-function ChainRulesCore.rrule(::typeof(NamedTuple), d::AbstractDict{K,V}) where {K,V}
-    # y = NamedTuple(pairs(d))
-    y = NamedTuple(Pair.(Symbol.(keys(d)), values(d)))
-    function NamedTuple_pullback(ȳ)
-        T = typeof(d)
-        # NoTangent(), T([K(k) => V(v) for (k, v) = pairs(ȳ)])
-        NoTangent(), OrderedDict(pairs(ȳ))
-    end
-    return y, NamedTuple_pullback
-end
+# function ChainRulesCore.rrule(::typeof(NamedTuple), d::AbstractDict{K,V}) where {K,V}
+#     # y = NamedTuple(pairs(d))
+#     y = NamedTuple(Pair.(Symbol.(keys(d)), values(d)))
+#     function NamedTuple_pullback(ȳ)
+#         T = typeof(d)
+#         # NoTangent(), T([K(k) => V(v) for (k, v) = pairs(ȳ)])
+#         NoTangent(), OrderedDict(pairs(ȳ))
+#     end
+#     return y, NamedTuple_pullback
+# end

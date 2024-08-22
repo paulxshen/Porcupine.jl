@@ -10,5 +10,6 @@ end
 
 values(x::NamedTuple) = collect(x)
 values(x::Base.RefValue) = x[]
-values(d::AbstractDict) = collect(Base.values(d))
+# values(d::AbstractDict) = collect(Base.values(d))
+values(d::AbstractDict) = [d[k] for k in keys(d)]
 values(x) = Base.values(x)
