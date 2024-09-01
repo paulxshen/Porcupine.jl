@@ -7,9 +7,9 @@ using Zygote: Buffer
 
 include("ad.jl")
 include("ops.jl")
+include("dictitrs.jl")
 include("dict.jl")
 include("string.jl")
-include("dictitrs.jl")
 include("vf.jl")
 include("float.jl")
 include("misc.jl")

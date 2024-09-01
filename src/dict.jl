@@ -3,9 +3,14 @@ Base.map(f::Function, s::AbstractSet) = [f(x) for x = s]
 
 leaves(x) = [x]
 function leaves(d::Union{Dictlike,AbstractVector{<:AbstractArray}})
-    # dict([k => leaves(d[k]) for k in keys(d)])
     reduce(vcat, leaves.(values(d)))
 end
+
+flatten(x::Union{Number,String,Symbol}) = [x]
+function flatten(c)
+    reduce(vcat, flatten.(values(c)))
+end
+
 function approx_getindex(d, k)
     for _k in keys(d)
         if k ≈ _k
@@ -39,7 +44,7 @@ function _getindex(d, k)
     end
 end
 
-Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : getindex(d, k)
+Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : d(k)
 
 function (d::Dictlike)(k::Int)
     haskey(d, k) && return d[k]
@@ -210,15 +215,17 @@ function ChainRulesCore.rrule(::typeof(namedtuple), ps)
     return y, NamedTuple_pullback
 end
 
-function ChainRulesCore.rrule(::typeof(Pair), a::Symbol, b::AbstractArray)
+function ChainRulesCore.rrule(::Type{Pair}, a::Symbol, b)
     y = Pair(a, b)
     function Pair_pullback(ȳ)
-        NoTangent(), ȳ[1], ȳ[2]
+        NoTangent(), NoTangent(), ȳ[2]
     end
     return y, Pair_pullback
 end
 
-group(d, k) = namedtuple([_k => d[_k] for _k in keys(d) if startswith(string(_k), string(k))])
+group(d, k) = namedtuple([_k => d[_k] for _k in ignore_derivatives() do
+    filter(_k -> startswith(string(_k), string(k)), keys(d))
+end])
 
 # Base.NamedTuple(v::AbstractVector{<:Tuple{<:Symbol,<:Any}}) = NamedTuple(Pair.(v))
 # namedtuple(x) = NamedTuple(x)
