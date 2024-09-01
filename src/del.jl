@@ -2,7 +2,7 @@
 struct StaggeredDel
     Δ::AbstractArray
     autodiff::Bool
-    function StaggeredDel(Δ::AbstractArray; autodiff=true)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
+    function StaggeredDel(Δ::AbstractArray; autodiff=false)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
         new(Δ, autodiff)
     end
 end
@@ -22,7 +22,7 @@ function cdiff(a::AbstractArray, ; dims,)
     diff(a; dims)
 end
 
-function sdiff(a, ; dims, autodiff=true)
+function sdiff(a; dims, autodiff=false)
     select = 1:ndims(a) .== dims
     shifts = right(a) - left(a)
     a = array(a)
@@ -37,7 +37,8 @@ function sdiff(a, ; dims, autodiff=true)
     if autodiff
         z = T(zeros(zsz))
     else
-        _zeros = parentmodule(T).zeros
+        m = parentmodule(T)
+        _zeros = isdefined(m, :zeros) ? m.zeros : zeros
         z = _zeros(zsz)
     end
 
