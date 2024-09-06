@@ -17,7 +17,4 @@ Base.Float16(x::Str) = parse(Float16, string(x))
 Base.Float32(x::Str) = parse(Float32, string(x))
 Base.Float64(x::Str) = parse(Float64, string(x))
 
-# T = Union{Int,Symbol}
-# Base.startswith(s, x::T) = startswith(s, string(x))
-# Base.startswith(s::T, x) = startswith(string(s), x)
-# Base.startswith(s::T, x::T) = startswith(string(s), string(x))
+Base.startswith(s, x) = startswith(string(s), string(x))

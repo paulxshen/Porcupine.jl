@@ -30,9 +30,9 @@ function sdiff(a; dims, autodiff=false)
     v = shifts[dims]
     n = size(a, dims)
     zsz = collect(size(a))
-    ignore_derivatives() do
+    zsz = ignore_derivatives() do
         zsz[dims] = 1
-        zsz = tuple(zsz...)
+        tuple(zsz...)
     end
     if autodiff
         z = T(zeros(zsz))
@@ -43,7 +43,6 @@ function sdiff(a; dims, autodiff=false)
     end
 
     if v == 1
-
         if autodiff
             return cat(z, diff(a, ; dims), dims=dims)
         else
