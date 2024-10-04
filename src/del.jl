@@ -1,9 +1,10 @@
 
 struct StaggeredDel
     Δ::AbstractArray
-    autodiff::Bool
-    function StaggeredDel(Δ::AbstractArray; autodiff=false)#; tpad=zeros(Int, length(Δ, 2)), cd::Bool=false)
-        new(Δ, autodiff)
+    padamt
+    alg
+    function StaggeredDel(Δ, padamt, alg=nothing)
+        new(Δ, padamt, alg)
     end
 end
 # @functor StaggeredDel
@@ -22,104 +23,82 @@ function cdiff(a::AbstractArray, ; dims,)
     diff(a; dims)
 end
 
-function sdiff(a; dims, autodiff=false)
+function sdiff(a, padamt=zeros(Int, ndims(a), 2); dims)
     select = 1:ndims(a) .== dims
-    shifts = right(a) - left(a)
-    a = array(a)
-    T = typeof(a)
-    v = shifts[dims]
     n = size(a, dims)
-    zsz = collect(size(a))
-    zsz = ignore_derivatives() do
-        zsz[dims] = 1
-        tuple(zsz...)
-    end
-    if autodiff
-        z = T(zeros(zsz))
-    else
-        m = parentmodule(T)
-        _zeros = isdefined(m, :zeros) ? m.zeros : zeros
-        z = _zeros(zsz)
-    end
-
-    if v == 1
-        if autodiff
-            return cat(z, diff(a, ; dims), dims=dims)
-        else
-            # b = T(zeros(size(a)))
-            b = similar(a)
-            # b = autodiff ? Buffer(a) : similar(a)
-            i = [s ? (2:n) : (:) for s = select]
-            b[i...] = diff(a; dims)
-            i = [s ? (1:1) : (:) for s = select]
-            b[i...] = z
-            # autodiff && return copy(b)
-            return b
-        end
-        #     # b = a - circshift(a, select)
-        #     # b = cat(z, selectdim(b, dims, 2:n), dims=dims)
-        #     b = autodiff ? Buffer(a) : similar(a)
-        # end
-        # # autodiff && return copy(b)
-        # return b
-        #     # b = Buffer(a)
-        #     b[[i == 0 ? (:) : 2:(size(a, dims)) for i = select]...] = diff(a; dims)
-        #     # return copy(b)
-        #     # cat(selectdim(a, dims, 1:1), diff(a; dims), dims=dims)
-        #     return b
-        # end
-    elseif v == -1
-        if autodiff
-            return cat(diff(a; dims), z, dims=dims)
-        else
-            # b = T(zeros(size(a)))
-            b = similar(a)
-            # b = autodiff ? Buffer(a) : similar(a)
-            i = [s ? (1:n-1) : (:) for s = select]
-            b[i...] = diff(a; dims)
-            i = [s ? (n:n) : (:) for s = select]
-            b[i...] = z
-            # autodiff && return copy(b)
-            return b
-        end
-        #     b = circshift(a, -select) - a
-        #     b = cat(selectdim(b, dims, 1:n-1), z, dims=dims)
-        #     b = autodiff ? Buffer(a) : similar(a)
-        # end
-        # # autodiff && return copy(b)
-        #     b[[i == 0 ? (:) : 1:(size(a, dims)-1) for i = select]...] = diff(a; dims)
-        #     return b
-        #     # return copy(b)
-        # end
-    elseif left(a)[dims] == 1
-        return diff(a; dims)
-    elseif left(a)[dims] == 0
-        return pad(diff(a; dims), 0, select)
-    end
-
-    # a_ = Buffer(a)
-    # if v == 1
-    #     # return a - circshift(a, select)
-    #     i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
-    #     i_ = [i == dims ? (1:1) : ax for (i, ax) = enumerate(axes(a))]
-    # elseif v == -1
-    #     # return circshift(a, -select) - a
-    #     i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
-    #     i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = enumerate(axes(a))]
-    # elseif left(a)[dims] == 1
-    #     return diff(a; dims)
-    # elseif left(a)[dims] == 0
-    #     return pad(diff(a; dims), 0, select)
+    l, r = eachcol(padamt)
+    shifts = r - l
+    # shifts = right(a) - left(a)
+    # a = array(a)
+    T = eltype(a)
+    C = inv(stack([range(-1.5, 1.5, 4) .^ p for p = 0:3]))[2, :]
+    C = T.(C)
+    zsz = size(a) .* (1 - select) + select |> Tuple
+    z = zeros(T, zsz)
+    z = typeof(a)(z)
+    # else
+    #     m = parentmodule(T)
+    #     _zeros = isdefined(m, :zeros) ? m.zeros : zeros
+    #     z = _zeros(zsz)
     # end
 
-    # a_[i...] = diff(a; dims)
-    # a_[i_...] = fill(0, length.(i_)...)
-    # # fill![i_...] .= 0
-    # copy(a_)
+    if n > 5
+        L = selectdim(a, dims, 2:2) - selectdim(a, dims, 1:1)
+        M = sum(C .* selectdim.((a,), dims, range.(1:4, n - (3:-1:0))))
+        R = selectdim(a, dims, n:n) - selectdim(a, dims, n-1:n-1)
+        if shifts[dims] == -1
+            return cat(z, L, M, R, dims=dims)
+        elseif shifts[dims] == 1
+            return cat(L, M, R, z, dims=dims)
+        end
+    end
+
+    if shifts[dims] == -1
+        return cat(z, diff(a, ; dims), dims=dims)
+    elseif shifts[dims] == 1
+        return cat(L, M, R, z, dims=dims)
+    elseif l[dims] == 0
+        return diff(a; dims)
+    elseif l[dims] == 1
+        return pad(diff(a; dims), 0, select)
+    end
+end
+
+function fftsdiff(a, padamt=zeros(Int, ndims(a), 2); dims)
+    T = eltype(a)
+    select = 1:ndims(a) .== dims
+    n = size(a, dims)
+
+    # ω = repeat(2π / n * (0:n-1), (size(a) .* (1 - select) + select)...)
+    # @memoize
+    ω = 2π / n * (getindex.(CartesianIndices(a), dims) - 1)
+    ω = typeof(a)(ω)
+    ω = (ω + π) .% (2π) - π
+    D = im * ω
+    E = cis.(ω / 2)
+    A = fft(a)
+    Da = real(ifft(E .* D .* A))
+    Da = selectdim(Da, dims, 1:n-1)
+
+    l, r = eachcol(padamt)
+    shifts = r - l
+    zsz = size(a) .* (1 - select) + select |> Tuple
+    z = zeros(T, zsz)
+    z = typeof(a)(z)
+
+    if shifts[dims] == -1
+        return cat(z, Da, dims=dims)
+    elseif shifts[dims] == 1
+        return cat(Da, z, dims=dims)
+        # elseif l[dims] == 0
+        #     return diff(a; dims)
+        # elseif l[dims] == 1
+        #     return pad(diff(a; dims), 0, select)
+    end
 end
 
 function (m::Del)(a::AbstractArray{<:Number}, p=*)
-    @unpack Δ, autodiff = m
+    @unpack Δ, padamt = m
     n = length(Δ)
     if n == 1
         return pdiff(a) / Δ[1]
@@ -133,11 +112,20 @@ function (m::Del)(a::AbstractArray{<:Number}, p=*)
     end
 end
 
-function (m::StaggeredDel)(a, p=*)
-    @unpack Δ, autodiff = m
-    a = a |> values
+function (m::StaggeredDel)(d::Union{NamedTuple,AbstractDict}, p=*)
+    @unpack Δ, padamt, alg = m
+    padamt = getindex.((padamt,), keys(d))
+    _StaggeredDel(values(d), Δ, padamt, p, alg)
+end
+
+function _StaggeredDel(a, Δ, padamt, p, alg)
+    _sdiff = if isnothing(alg)
+        sdiff
+    else
+        fftsdiff
+    end
+
     n = length(Δ)
-    # I = [ax[begin:end-1] for ax = axes(first(a))]
     if p == dot
         return sum([pdiff(a[i], dims=i) for i = 1:n] ./ Δ)
     elseif p == cross
@@ -145,20 +133,23 @@ function (m::StaggeredDel)(a, p=*)
             dx, dy = Δ
             if length(a) == 1
                 u, = a
-                return [sdiff(u; autodiff, dims=2) / dy, -sdiff(u; autodiff, dims=1) / dx]
+                pu, = padamt
+                return [_sdiff(u, pu; dims=2) / dy, -_sdiff(u, pu; dims=1) / dx]
             else
                 u, v = a
-                return [sdiff(v; autodiff, dims=1) / dx - sdiff(u; autodiff, dims=2) / dy]
+                pu, pv = padamt
+                return [_sdiff(v, pv; dims=1) / dx - _sdiff(u, pu; dims=2) / dy]
             end
         elseif n == 3
             dx, dy, dz = Δ
             u, v, w = a
-            uy = sdiff(u; autodiff, dims=2) / dy
-            uz = sdiff(u; autodiff, dims=3) / dz
-            vx = sdiff(v; autodiff, dims=1) / dx
-            vz = sdiff(v; autodiff, dims=3) / dz
-            wx = sdiff(w; autodiff, dims=1) / dx
-            wy = sdiff(w; autodiff, dims=2) / dy
+            pu, pv, pw = padamt
+            uy = _sdiff(u, pu; dims=2) / dy
+            uz = _sdiff(u, pu; dims=3) / dz
+            vx = _sdiff(v, pv; dims=1) / dx
+            vz = _sdiff(v, pv; dims=3) / dz
+            wx = _sdiff(w, pw; dims=1) / dx
+            wy = _sdiff(w, pw; dims=2) / dy
             return [wy - vz, uz - wx, vx - uy]
         end
     end
@@ -179,3 +170,67 @@ function LinearAlgebra.cross(m::Del, a)
     m(a, cross)
 end
 
+# else
+#     # b = T(zeros(size(a)))
+#     b = similar(a)
+#     # b = autodiff ? Buffer(a) : similar(a)
+#     i = [s ? (2:n) : (:) for s = select]
+#     b[i...] = diff(a; dims)
+#     i = [s ? (1:1) : (:) for s = select]
+#     b[i...] = z
+#     # autodiff && return copy(b)
+#     return b
+# end
+#     # b = a - circshift(a, select)
+#     # b = cat(z, selectdim(b, dims, 2:n), dims=dims)
+#     b = autodiff ? Buffer(a) : similar(a)
+# end
+# # autodiff && return copy(b)
+# return b
+#     # b = Buffer(a)
+#     b[[i == 0 ? (:) : 2:(size(a, dims)) for i = select]...] = diff(a; dims)
+#     # return copy(b)
+#     # cat(selectdim(a, dims, 1:1), diff(a; dims), dims=dims)
+#     return b
+# end
+# return cat(diff(a; dims), z, dims=dims)
+
+#     # b = T(zeros(size(a)))
+#     b = similar(a)
+#     # b = autodiff ? Buffer(a) : similar(a)
+#     i = [s ? (1:n-1) : (:) for s = select]
+#     b[i...] = diff(a; dims)
+#     i = [s ? (n:n) : (:) for s = select]
+#     b[i...] = z
+#     # autodiff && return copy(b)
+#     return b
+# end
+#     b = circshift(a, -select) - a
+#     b = cat(selectdim(b, dims, 1:n-1), z, dims=dims)
+#     b = autodiff ? Buffer(a) : similar(a)
+# end
+# # autodiff && return copy(b)
+#     b[[i == 0 ? (:) : 1:(size(a, dims)-1) for i = select]...] = diff(a; dims)
+#     return b
+#     # return copy(b)
+# end
+
+# a_ = Buffer(a)
+# if v == 1
+#     # return a - circshift(a, select)
+#     i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
+#     i_ = [i == dims ? (1:1) : ax for (i, ax) = enumerate(axes(a))]
+# elseif v == -1
+#     # return circshift(a, -select) - a
+#     i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
+#     i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = enumerate(axes(a))]
+# elseif left(a)[dims] == 1
+#     return diff(a; dims)
+# elseif left(a)[dims] == 0
+#     return pad(diff(a; dims), 0, select)
+# end
+
+# a_[i...] = diff(a; dims)
+# a_[i_...] = fill(0, length.(i_)...)
+# # fill![i_...] .= 0
+# copy(a_)

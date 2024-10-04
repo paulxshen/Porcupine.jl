@@ -3,6 +3,7 @@ include("main.jl")
 export Del, StaggeredDel, CenteredDel, Laplacian#, Op, Gauss
 export dict, namedtuple, group, recursive_getindex, approx_getindex, unroll, Numeric, Dictlike, List, Collection
 export °, gaussian
-export whole, apply, fmap, approx_getindex, leaves, flatten, hasnan, interp, getindexf
+export whole, apply, fmap, approx_getindex, leaves, flatten, hasnan, interp, getindexf, setindexf!
+export upsample, downsample
 # keys, values, first,
 end # module FDMTK

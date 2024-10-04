@@ -17,10 +17,20 @@ end
 # end
 # Base.getindex(a::AbstractArray, i...) = interp(a, i)
 
+function setindexf!(a, v, I...)
+    o = first.(I)
+    o, w = nn(o)
+    w = eltype(a).(w)
+    d = [isa(i, Number) ? 0 : (0:Int(step(i)):Int(last(i) - first(i))) for i in I]
+    for (o, w) = zip(o, w)
+        a[(o .+ d)...] = w * v
+    end
+
+end
 function getindexf(a, I...)
     o = first.(I)
-    o = eltype(a).(o)
     o, w = nn(o)
+    w = eltype(a).(w)
     d = [isa(i, Number) ? 0 : (0:Int(step(i)):Int(last(i) - first(i))) for i in I]
     sum([w * a[(o .+ d)...] for (o, w) = zip(o, w)])
 

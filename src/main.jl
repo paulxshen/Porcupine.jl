@@ -1,4 +1,4 @@
-using DataStructures, LinearAlgebra, Statistics, UnPack, Functors
+using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, FFTW
 using Functors: functor
 using Zygote, ChainRulesCore
 using ArrayPadding
@@ -16,5 +16,6 @@ include("misc.jl")
 include("del.jl")
 include("nan.jl")
 include("interp.jl")
+include("sampling.jl")
 # a = [2, 3, 4]
 # a[1.5]
