@@ -1,20 +1,20 @@
-VF = Union{AbstractVector{<:AbstractArray},Dictlike}
+VF = Union{AbstractVector{<:AbstractArray},Map}
 # Tuple,AbstractDict,NamedTuple,Base.RefValue}
 
 # vfmul(a, b) = a.(.*)b
 # vfmul(a, b) = broadcast(.*, a, b)
 # Base.:*(a::VF, b::VF) = broadcast(.*, a, b)
-# Base.:*(a::VF, b::Dictlike) = broadcast(.*, a, values(b))
-# Base.:*(a::Dictlike, b::VF) = broadcast(.*, values(a), b)
+# Base.:*(a::VF, b::Map) = broadcast(.*, a, values(b))
+# Base.:*(a::Map, b::VF) = broadcast(.*, values(a), b)
 # Base.:+(a::VF, b::AbstractArray) = a .+ [b]
 # Base.:+(a::AbstractArray, b::VF) = [a] .+ b
 # Base.:*(a::VF, b::AbstractArray) = a * [b]
 # Base.:*(a::AbstractArray{<:Number}, b::VF) = [a] * b
 
-# Base.:*(a::Dictlike, b::AbstractArray{<:Number}) = a * [b]
-# Base.:*(a::AbstractArray{<:Number}, b::Dictlike) = vfmul([a], b)
-# Base.:/(a::Dictlike, b::AbstractArray{<:Number}) = a / [b]
-# Base.:*(a::AbstractArray{<:Number}, b::Dictlike) = vfmul([a], b)
+# Base.:*(a::Map, b::AbstractArray{<:Number}) = a * [b]
+# Base.:*(a::AbstractArray{<:Number}, b::Map) = vfmul([a], b)
+# Base.:/(a::Map, b::AbstractArray{<:Number}) = a / [b]
+# Base.:*(a::AbstractArray{<:Number}, b::Map) = vfmul([a], b)
 
 function LinearAlgebra.cross(a::VF, b::VF)
     if length(a) == length(b) == 3

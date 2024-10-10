@@ -14,9 +14,9 @@ f16(x) = Float16(x)
 f32(x) = Float32(x)
 f64(x) = Float64(x)
 
-Base.Float16(d::Dictlike) = apply(f16, d)
-Base.Float32(d::Dictlike) = apply(f32, d)
-Base.Float64(d::Dictlike) = apply(f64, d)
+Base.Float16(d::Map) = apply(f16, d)
+Base.Float32(d::Map) = apply(f32, d)
+Base.Float64(d::Map) = apply(f64, d)
 
 # Base.Float16(x) = x
 # Base.Float32(x) = x

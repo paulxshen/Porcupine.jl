@@ -1,10 +1,11 @@
 
 struct StaggeredDel
     Δ::AbstractArray
-    padamt
+    padamts
+    padvals
     alg
-    function StaggeredDel(Δ, padamt, alg=nothing)
-        new(Δ, padamt, alg)
+    function StaggeredDel(Δ, padamts, padvals=zeros(eltype(Δ), ndims(Δ), 2), alg=nothing)
+        new(Δ, padamts, alg)
     end
 end
 # @functor StaggeredDel
@@ -23,82 +24,76 @@ function cdiff(a::AbstractArray, ; dims,)
     diff(a; dims)
 end
 
-function sdiff(a, padamt=zeros(Int, ndims(a), 2); dims)
-    select = 1:ndims(a) .== dims
-    n = size(a, dims)
-    l, r = eachcol(padamt)
-    shifts = r - l
-    # shifts = right(a) - left(a)
-    # a = array(a)
-    T = eltype(a)
-    C = inv(stack([range(-1.5, 1.5, 4) .^ p for p = 0:3]))[2, :]
-    C = T.(C)
-    zsz = size(a) .* (1 - select) + select |> Tuple
-    z = zeros(T, zsz)
-    z = typeof(a)(z)
-    # else
-    #     m = parentmodule(T)
-    #     _zeros = isdefined(m, :zeros) ? m.zeros : zeros
-    #     z = _zeros(zsz)
-    # end
-
-    if n > 5
-        L = selectdim(a, dims, 2:2) - selectdim(a, dims, 1:1)
-        M = sum(C .* selectdim.((a,), dims, range.(1:4, n - (3:-1:0))))
-        R = selectdim(a, dims, n:n) - selectdim(a, dims, n-1:n-1)
-        if shifts[dims] == -1
-            return cat(z, L, M, R, dims=dims)
-        elseif shifts[dims] == 1
-            return cat(L, M, R, z, dims=dims)
-        end
-    end
-
-    if shifts[dims] == -1
-        return cat(z, diff(a, ; dims), dims=dims)
-    elseif shifts[dims] == 1
-        return cat(L, M, R, z, dims=dims)
-    elseif l[dims] == 0
-        return diff(a; dims)
-    elseif l[dims] == 1
-        return pad(diff(a; dims), 0, select)
-    end
+const _C = inv(stack([range(-1.5, 1.5, 4) .^ p for p = 0:3]))[2, :]
+function pdiff(a, padamts=[0, 0], padvals=[0, 0]; dims)
+    l, r = padamts
+    p, q = padvals
+    a = diff(a; dims)
+    a = pad(a, p, l, 0)
+    pad(a, q, 0, r)
 end
+pdiff(a, padamts::AbstractMatrix, padvals::AbstractMatrix; dims) =
+    pdiff(a, padamts[dims, :], padvals[dims, :]; dims)
+# select = 1:ndims(a) .== dims
+# n = size(a, dims)
+# T = eltype(a)
+# zsz = size(a) .* (1 - select) + select |> Tuple
+# z = zeros(T, zsz)
+# z = typeof(a)(z)
+# else
+#     m = parentmodule(T)
+#     _zeros = isdefined(m, :zeros) ? m.zeros : zeros
+#     z = _zeros(zsz)
+# end
 
-function fftsdiff(a, padamt=zeros(Int, ndims(a), 2); dims)
-    T = eltype(a)
-    select = 1:ndims(a) .== dims
-    n = size(a, dims)
+# C = T.(_C)
+# if n > 5
+#     L = selectdim(a, dims, 2:2) - selectdim(a, dims, 1:1)
+#     M = sum(C .* selectdim.((a,), dims, range.(1:4, n - (3:-1:0))))
+#     R = selectdim(a, dims, n:n) - selectdim(a, dims, n-1:n-1)
+#     if shifts[dims] == -1
+#         return cat(z, L, M, R, dims=dims)
+#     elseif shifts[dims] == 1
+#         return cat(L, M, R, z, dims=dims)
+#     end
+# end
 
-    # ω = repeat(2π / n * (0:n-1), (size(a) .* (1 - select) + select)...)
-    # @memoize
-    ω = 2π / n * (getindex.(CartesianIndices(a), dims) - 1)
-    ω = typeof(a)(ω)
-    ω = (ω + π) .% (2π) - π
-    D = im * ω
-    E = cis.(ω / 2)
-    A = fft(a)
-    Da = real(ifft(E .* D .* A))
-    Da = selectdim(Da, dims, 1:n-1)
 
-    l, r = eachcol(padamt)
-    shifts = r - l
-    zsz = size(a) .* (1 - select) + select |> Tuple
-    z = zeros(T, zsz)
-    z = typeof(a)(z)
+# function fftsdiff(a, padamts=zeros(Int, ndims(a), 2); dims)
+#     T = eltype(a)
+#     select = 1:ndims(a) .== dims
+#     n = size(a, dims)
 
-    if shifts[dims] == -1
-        return cat(z, Da, dims=dims)
-    elseif shifts[dims] == 1
-        return cat(Da, z, dims=dims)
-        # elseif l[dims] == 0
-        #     return diff(a; dims)
-        # elseif l[dims] == 1
-        #     return pad(diff(a; dims), 0, select)
-    end
-end
+#     # ω = repeat(2π / n * (0:n-1), (size(a) .* (1 - select) + select)...)
+#     # @memoize
+#     ω = 2π / n * (getindex.(CartesianIndices(a), dims) - 1)
+#     ω = typeof(a)(ω)
+#     ω = (ω + π) .% (2π) - π
+#     D = im * ω
+#     E = cis.(ω / 2)
+#     A = fft(a)
+#     Da = real(ifft(E .* D .* A))
+#     Da = selectdim(Da, dims, 1:n-1)
+
+#     l, r = eachcol(padamts)
+#     shifts = r - l
+#     zsz = size(a) .* (1 - select) + select |> Tuple
+#     z = zeros(T, zsz)
+#     z = typeof(a)(z)
+
+#     if shifts[dims] == -1
+#         return cat(z, Da, dims=dims)
+#     elseif shifts[dims] == 1
+#         return cat(Da, z, dims=dims)
+#         # elseif l[dims] == 0
+#         #     return diff(a; dims)
+#         # elseif l[dims] == 1
+#         #     return pad(diff(a; dims), 0, select)
+#     end
+# end
 
 function (m::Del)(a::AbstractArray{<:Number}, p=*)
-    @unpack Δ, padamt = m
+    @unpack Δ, padamts = m
     n = length(Δ)
     if n == 1
         return pdiff(a) / Δ[1]
@@ -113,18 +108,13 @@ function (m::Del)(a::AbstractArray{<:Number}, p=*)
 end
 
 function (m::StaggeredDel)(d::Union{NamedTuple,AbstractDict}, p=*)
-    @unpack Δ, padamt, alg = m
-    padamt = getindex.((padamt,), keys(d))
-    _StaggeredDel(values(d), Δ, padamt, p, alg)
+    @unpack Δ, padamts, padvals, alg = m
+    padamts = getindex.((padamts,), keys(d))
+    padvals = getindex.((padvals,), keys(d))
+    _StaggeredDel(values(d), Δ, padamts, padvals, p, alg)
 end
 
-function _StaggeredDel(a, Δ, padamt, p, alg)
-    _sdiff = if isnothing(alg)
-        sdiff
-    else
-        fftsdiff
-    end
-
+function _StaggeredDel(a, Δ, padamts, padvals, p, alg)
     n = length(Δ)
     if p == dot
         return sum([pdiff(a[i], dims=i) for i = 1:n] ./ Δ)
@@ -133,23 +123,26 @@ function _StaggeredDel(a, Δ, padamt, p, alg)
             dx, dy = Δ
             if length(a) == 1
                 u, = a
-                pu, = padamt
-                return [_sdiff(u, pu; dims=2) / dy, -_sdiff(u, pu; dims=1) / dx]
+                nu, = padamts
+                ku, = padvals
+                return [pdiff(u, nu, ku; dims=2) / dy, -pdiff(u, nu, ku; dims=1) / dx]
             else
                 u, v = a
-                pu, pv = padamt
-                return [_sdiff(v, pv; dims=1) / dx - _sdiff(u, pu; dims=2) / dy]
+                nu, nv = padamts
+                ku, kv = padvals
+                return [pdiff(v, nv, kv; dims=1) / dx - pdiff(u, nu, ku; dims=2) / dy]
             end
         elseif n == 3
             dx, dy, dz = Δ
             u, v, w = a
-            pu, pv, pw = padamt
-            uy = _sdiff(u, pu; dims=2) / dy
-            uz = _sdiff(u, pu; dims=3) / dz
-            vx = _sdiff(v, pv; dims=1) / dx
-            vz = _sdiff(v, pv; dims=3) / dz
-            wx = _sdiff(w, pw; dims=1) / dx
-            wy = _sdiff(w, pw; dims=2) / dy
+            nu, nv, nw = padamts
+            ku, kv, kw = padvals
+            uy = pdiff(u, nu, ku; dims=2) / dy
+            uz = pdiff(u, nu, ku; dims=3) / dz
+            vx = pdiff(v, nv, kv; dims=1) / dx
+            vz = pdiff(v, nv, kv; dims=3) / dz
+            wx = pdiff(w, nw, kw; dims=1) / dx
+            wy = pdiff(w, nw, kw; dims=2) / dy
             return [wy - vz, uz - wx, vx - uy]
         end
     end

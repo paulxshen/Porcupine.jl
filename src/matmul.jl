@@ -1,0 +1,1 @@
+Base.:*(A::AbstractMatrix{<:AbstractArray}, v::Map) = [sum([a .* v for (a, v) = zip(r, values(v))]) for r in eachrow(A)]
