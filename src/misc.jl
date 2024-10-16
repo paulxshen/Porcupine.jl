@@ -5,12 +5,12 @@ Base.Any(x) = x
 # d2(x) = round.(x, sigdigits=2)
 # gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)
 
-Base.round(x::AbstractFloat) = Base.round.(Int, x)
-Base.floor(x::AbstractFloat) = Base.floor.(Int, x)
-Base.ceil(x::AbstractFloat) = Base.ceil.(Int, x)
-Base.round(a::List) = Base.round.(a)
-Base.floor(a::List) = Base.floor.(a)
-Base.ceil(a::List) = Base.ceil.(a)
+round(x) = Base.round.(Int, x)
+round(T, x) = Base.round.(T, x)
+floor(x) = Base.floor.(Int, x)
+floor(T, x) = Base.floor.(T, x)
+ceil(x) = Base.ceil.(Int, x)
+ceil(T, x) = Base.ceil.(T, x)
 
 Base.ndims(a) = length(size(a))
 Base.size(x) = (length(x),)
@@ -19,7 +19,7 @@ Base.size(x) = (length(x),)
 # Base.convert(T, x) = convert.(T, x)
 
 # Base.Float64(x::List) = f64(x)
-whole(x, dx) = round(x / dx) * dx
+trim(x, dx) = round.(x / dx) * dx
 
 ° = π / 180
 gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)

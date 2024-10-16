@@ -15,7 +15,7 @@ end
 function dict(ps::Vector{<:Pair{K,V}}) where {K,V}
     dict(K, V, ps)
 end
-
+dict(x::NamedTuple) = dict(pairs(x))
 function dict(ps)
     dict(Any, Any, ps)
 end

@@ -1,39 +1,81 @@
+function pdiff(a, l=nothing, r=nothing; dims)
+    I = 1:ndims(a) .== dims
+    # T = eltype(a)
+    # zsz = size(a) .* (1 - select) + select |> Tuple
+    # z = zeros(T, zsz)
+    # if !isnothing(l)
+    #     # if l == 1
+    #     return cat(z, diff(a; dims=dims), dims=dims)
+    # elseif !isnothing(r)
+    #     # elseif r == 1
+    #     return cat(diff(a; dims=dims), z, dims=dims)
+    # end
+    a = diff(a; dims)
+    if !isnothing(l)
+        a = pad(a, l, I, 0; dims)
+    end
+    if !isnothing(r)
+        a = pad(a, r, 0, I; dims)
+    end
+    a
+end
+pdiff(a, padding::AbstractMatrix; dims) = pdiff(a, padding[dims, :]...; dims)
 
-struct StaggeredDel
+struct Del
     Δ::AbstractArray
-    padamts
-    padvals
-    alg
-    function StaggeredDel(Δ, padamts, padvals=zeros(eltype(Δ), ndims(Δ), 2), alg=nothing)
-        new(Δ, padamts, alg)
+    padding
+    # function Del(Δ, padding, alg=nothing)
+    #     new(Δ, padding, alg)
+    # end
+end
+
+function LinearAlgebra.cross(m::Del, d::Map)
+    @unpack Δ, padding = m
+    ps = getindex.((padding,), keys(d))
+    as = values(d)
+    N = length(Δ)
+    # if p == dot
+    #     return sum([pdiff(a[i], dims=i) for i = 1:n] ./ Δ)
+    if N == 2
+        dx, dy = Δ
+        if length(as) == 1
+            u, = as
+            pu, = ps
+            return [pdiff(u, pu; dims=2) / dy, -pdiff(u, pu; dims=1) / dx]
+        elseif length(as) == 2
+            u, v = as
+            pu, pv = ps
+            return [pdiff(v, pv; dims=1) / dx - pdiff(u, pu; dims=2) / dy]
+        end
+    elseif n == 3
+        dx, dy, dz = Δ
+        u, v, w = as
+        pu, pv, pw = ps
+        uy = pdiff(u, pu; dims=2) / dy
+        uz = pdiff(u, pu; dims=3) / dz
+        vx = pdiff(v, pv; dims=1) / dx
+        vz = pdiff(v, pv; dims=3) / dz
+        wx = pdiff(w, pw; dims=1) / dx
+        wy = pdiff(w, pw; dims=2) / dy
+        return [wy - vz, uz - wx, vx - uy]
     end
 end
-# @functor StaggeredDel
-struct CenteredDel
-    Δ::AbstractArray
-end
-struct Laplacian
-    Δ::AbstractArray
-end
-Del = Union{StaggeredDel,CenteredDel}
-function lap(a::AbstractArray, ; dims=1)
-    select = 1:ndims(a) .== dims
-    circshift(a, -select) - 2a + circshift(a, select)
-end
-function cdiff(a::AbstractArray, ; dims,)
-    diff(a; dims)
-end
+# function LinearAlgebra.dot(m::Del, a)
+#     m(a, dot)
+# end
 
-const _C = inv(stack([range(-1.5, 1.5, 4) .^ p for p = 0:3]))[2, :]
-function pdiff(a, padamts=[0, 0], padvals=[0, 0]; dims)
-    l, r = padamts
-    p, q = padvals
-    a = diff(a; dims)
-    a = pad(a, p, l, 0)
-    pad(a, q, 0, r)
-end
-pdiff(a, padamts::AbstractMatrix, padvals::AbstractMatrix; dims) =
-    pdiff(a, padamts[dims, :], padvals[dims, :]; dims)
+# struct Laplacian
+#     Δ::AbstractArray
+# end
+# function lap(a::AbstractArray, ; dims=1)
+#     select = 1:ndims(a) .== dims
+#     circshift(a, -select) - 2a + circshift(a, select)
+# end
+# function cdiff(a::AbstractArray, ; dims,)
+#     diff(a; dims)
+# end
+
+# const _C = ipv(stack([range(-1.5, 1.5, 4) .^ p for p = 0:3]))[2, :]
 # select = 1:ndims(a) .== dims
 # n = size(a, dims)
 # T = eltype(a)
@@ -59,7 +101,7 @@ pdiff(a, padamts::AbstractMatrix, padvals::AbstractMatrix; dims) =
 # end
 
 
-# function fftsdiff(a, padamts=zeros(Int, ndims(a), 2); dims)
+# function fftsdiff(a, padding=zeros(Int, ndims(a), 2); dims)
 #     T = eltype(a)
 #     select = 1:ndims(a) .== dims
 #     n = size(a, dims)
@@ -75,7 +117,7 @@ pdiff(a, padamts::AbstractMatrix, padvals::AbstractMatrix; dims) =
 #     Da = real(ifft(E .* D .* A))
 #     Da = selectdim(Da, dims, 1:n-1)
 
-#     l, r = eachcol(padamts)
+#     l, r = eachcol(padding)
 #     shifts = r - l
 #     zsz = size(a) .* (1 - select) + select |> Tuple
 #     z = zeros(T, zsz)
@@ -92,76 +134,30 @@ pdiff(a, padamts::AbstractMatrix, padvals::AbstractMatrix; dims) =
 #     end
 # end
 
-function (m::Del)(a::AbstractArray{<:Number}, p=*)
-    @unpack Δ, padamts = m
-    n = length(Δ)
-    if n == 1
-        return pdiff(a) / Δ[1]
-    end
+# function (m::Del)(a::AbstractArray{<:pumber}, p=*)
+#     @unpack Δ, padding = m
+#     n = length(Δ)
+#     if n == 1
+#         return pdiff(a) / Δ[1]
+#     end
 
-    I = [ax[begin:end-1] for ax = axes(a)[1:n]]
-    if p == *
-        return [pdiff(a, dims=i) for i = 1:n] ./ Δ
-    elseif p == cross
-        dx, dy = Δ
-    end
-end
+#     I = [ax[begin:end-1] for ax = axes(a)[1:n]]
+#     if p == *
+#         return [pdiff(a, dims=i) for i = 1:n] ./ Δ
+#     elseif p == cross
+#         dx, dy = Δ
+#     end
+# end
 
-function (m::StaggeredDel)(d::Union{NamedTuple,AbstractDict}, p=*)
-    @unpack Δ, padamts, padvals, alg = m
-    padamts = getindex.((padamts,), keys(d))
-    padvals = getindex.((padvals,), keys(d))
-    _StaggeredDel(values(d), Δ, padamts, padvals, p, alg)
-end
 
-function _StaggeredDel(a, Δ, padamts, padvals, p, alg)
-    n = length(Δ)
-    if p == dot
-        return sum([pdiff(a[i], dims=i) for i = 1:n] ./ Δ)
-    elseif p == cross
-        if n == 2
-            dx, dy = Δ
-            if length(a) == 1
-                u, = a
-                nu, = padamts
-                ku, = padvals
-                return [pdiff(u, nu, ku; dims=2) / dy, -pdiff(u, nu, ku; dims=1) / dx]
-            else
-                u, v = a
-                nu, nv = padamts
-                ku, kv = padvals
-                return [pdiff(v, nv, kv; dims=1) / dx - pdiff(u, nu, ku; dims=2) / dy]
-            end
-        elseif n == 3
-            dx, dy, dz = Δ
-            u, v, w = a
-            nu, nv, nw = padamts
-            ku, kv, kw = padvals
-            uy = pdiff(u, nu, ku; dims=2) / dy
-            uz = pdiff(u, nu, ku; dims=3) / dz
-            vx = pdiff(v, nv, kv; dims=1) / dx
-            vz = pdiff(v, nv, kv; dims=3) / dz
-            wx = pdiff(w, nw, kw; dims=1) / dx
-            wy = pdiff(w, nw, kw; dims=2) / dy
-            return [wy - vz, uz - wx, vx - uy]
-        end
-    end
-end
+# function (m::Laplacian)(a)
+#     sum([lap(a, dims=i) * Δ for (i, Δ) = zip(Δ)])
+# end
+# function (m::Laplacian)(v::VF)
+#     m.(a)
+# end
 
-function (m::Laplacian)(a)
-    sum([lap(a, dims=i) * Δ for (i, Δ) = zip(Δ)])
-end
-function (m::Laplacian)(v::VF)
-    m.(a)
-end
 
-function LinearAlgebra.dot(m::Del, a)
-    m(a, dot)
-end
-
-function LinearAlgebra.cross(m::Del, a)
-    m(a, cross)
-end
 
 # else
 #     # b = T(zeros(size(a)))
@@ -211,12 +207,12 @@ end
 # a_ = Buffer(a)
 # if v == 1
 #     # return a - circshift(a, select)
-#     i = [i == dims ? ax[2:end] : ax for (i, ax) = enumerate(axes(a))]
-#     i_ = [i == dims ? (1:1) : ax for (i, ax) = enumerate(axes(a))]
+#     i = [i == dims ? ax[2:end] : ax for (i, ax) = epumerate(axes(a))]
+#     i_ = [i == dims ? (1:1) : ax for (i, ax) = epumerate(axes(a))]
 # elseif v == -1
 #     # return circshift(a, -select) - a
-#     i = [i == dims ? ax[1:end-1] : ax for (i, ax) = enumerate(axes(a))]
-#     i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = enumerate(axes(a))]
+#     i = [i == dims ? ax[1:end-1] : ax for (i, ax) = epumerate(axes(a))]
+#     i_ = [i == dims ? (ax[end]:ax[end]) : ax for (i, ax) = epumerate(axes(a))]
 # elseif left(a)[dims] == 1
 #     return diff(a; dims)
 # elseif left(a)[dims] == 0
