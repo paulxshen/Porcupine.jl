@@ -6,8 +6,9 @@ export dict, namedtuple
 export recursive_getindex, approx_getindex
 export getindexf, setindexf!, crop
 export trim, fmap, kmap, leaves, flatten
-export °, gaussian
-export upsample, downsample
+export °, gaussian, dropitr, adddims
+export int
+export upsample, downsample, v2i, indexof, i2v
 export symmetric
 export ⊙, ⊘
 # export round, ceil, floor

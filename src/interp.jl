@@ -5,22 +5,22 @@ function nn(i)
     q = ignore_derivatives() do
         ceil.(Int, i)
     end
-    aw = [(j, prod(1 - abs.(i - j))) for j = Base.product([p[i] == q[i] ? (p[i],) : (p[i], q[i]) for i = 1:length(i)]...)]
-    aw = filter(x -> x[2] > 0, aw)
+    aw = [(j, prod(1 - abs.(i - j))) for j = ignore_derivatives() do
+        Base.product(unique.(zip(p, q))...)
+    end]
     return getindex.(aw, 1), getindex.(aw, 2)
 end
+Base.Int(x::AbstractRange) = Int(first(x)):Int(step(x)):Int(last(x))
 
 function setindexf!(a, v, I...)
     o = first.(I)
     os, ws = nn(o)
     ws = eltype(a).(ws)
-    d = [isa(i, Number) ? 0 : (0:Int(step(i)):round(Int, last(i) - first(i))) for i in I]
-    for (o, w) = zip(os, ws)
-        a[(o .+ d)...] = w * v
+    for (_o, w) = zip(os, ws)
+        a[Int.(_o - o .+ I)...] += w * v
     end
 end
 
-Base.Int(x::AbstractRange) = Int(first(x)):Int(step(x)):Int(last(x))
 function getindexf(a, I...)
     o = first.(I)
     os, ws = nn(o)
@@ -37,7 +37,7 @@ function getindexf(a, I...)
     else
         _a = a
     end
-    sum([w * _a[Int.((_o - o + l) .+ I)...] for (_o, w) = zip(os, ws)])
+    sum([w * _a[int.((_o - o + l) .+ I)...] for (_o, w) = zip(os, ws)])
 end
 
 function crop(a, l, r=l)

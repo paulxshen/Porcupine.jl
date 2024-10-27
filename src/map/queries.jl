@@ -9,7 +9,7 @@ function approx_getindex(d, k)
             return d[_k]
         end
     end
-    error("Key not found even approximately")
+    null
 end
 
 
@@ -25,12 +25,6 @@ function recursive_getindex(d::Map, k)
     null
 end
 
-function _getindex(d, k)
-    if haskey(d, k)
-        return d[k]
-    end
-end
-
 Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : d(k)
 
 function (d::Map)(k::Int)
@@ -40,17 +34,30 @@ function (d::Map)(k::Int)
     end
 end
 
-function (d::Map)(k::Symbol)
+_alt(x::Symbol) = string(x)
+_alt(x::String) = Symbol(x)
+function (d::Map)(k::Text)
     r = recursive_getindex(d, k)
     r != null && return r
-    recursive_getindex(d, string(k))
+    r = recursive_getindex(d, _alt(k))
+    r != null && return r
+    error("$k not found, even recursively")
 end
 
-function (d::Map)(k::String)
+function (d::Map)(k::Real)
     r = recursive_getindex(d, k)
     r != null && return r
-    recursive_getindex(d, Symbol(k))
+    r = recursive_getindex(d, Symbol(k))
+    r != null && return r
+    r = recursive_getindex(d, string(k))
+    r != null && return r
+    r = approx_getindex(d, k)
+    r != null && return r
+    error("$k not found, even recursively or approximately")
 end
+
+
+
 function (d::Map)(rx::Regex)
     ks = ignore_derivatives() do
         filter(keys(d)) do k

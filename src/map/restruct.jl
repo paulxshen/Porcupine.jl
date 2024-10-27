@@ -15,7 +15,7 @@ function fmap(f, x::T, type=Union{}) where {T}
     end
     xs, re = functor(x)
     # re(fmap.((f,), xs, (types,)))
-    re(fmap.((f,), xs))
+    re(fmap(f, xs, type))
 end
 kmap(f, x::Map) = fmap(f, x, Any)
 leaves(x) = [x]

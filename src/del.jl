@@ -19,19 +19,20 @@ function pdiff(a, l=nothing, r=nothing; dims)
     end
     a
 end
-pdiff(a, padding::AbstractMatrix; dims) = pdiff(a, padding[dims, :]...; dims)
+pdiff(a, diffpadvals::AbstractMatrix; dims) = pdiff(a, diffpadvals[dims, :]...; dims)
 
 struct Del
-    Δ::AbstractArray
-    padding
-    # function Del(Δ, padding, alg=nothing)
-    #     new(Δ, padding, alg)
+    Δ::List
+    diffpadvals
+    # function Del(Δ, diffpadvals, alg=nothing)
+    #     new(Δ, diffpadvals, alg)
     # end
 end
 
 function LinearAlgebra.cross(m::Del, d::Map)
-    @unpack Δ, padding = m
-    ps = getindex.((padding,), keys(d))
+    @unpack Δ, diffpadvals = m
+    ks = keys(d)
+    ps = getindex.((diffpadvals,), keys(d))
     as = values(d)
     N = length(Δ)
     # if p == dot
@@ -41,22 +42,25 @@ function LinearAlgebra.cross(m::Del, d::Map)
         if length(as) == 1
             u, = as
             pu, = ps
-            return [pdiff(u, pu; dims=2) / dy, -pdiff(u, pu; dims=1) / dx]
+            ku, = ks
+            return [pdiff(u, pu; dims=2) ./ dy[ku], -pdiff(u, pu; dims=1) ./ dx[ku]]
         elseif length(as) == 2
             u, v = as
             pu, pv = ps
-            return [pdiff(v, pv; dims=1) / dx - pdiff(u, pu; dims=2) / dy]
+            ku, kv = ks
+            return [pdiff(v, pv; dims=1) ./ dx[kv] - pdiff(u, pu; dims=2) ./ dy[ku]]
         end
-    elseif n == 3
+    elseif N == 3
         dx, dy, dz = Δ
         u, v, w = as
         pu, pv, pw = ps
-        uy = pdiff(u, pu; dims=2) / dy
-        uz = pdiff(u, pu; dims=3) / dz
-        vx = pdiff(v, pv; dims=1) / dx
-        vz = pdiff(v, pv; dims=3) / dz
-        wx = pdiff(w, pw; dims=1) / dx
-        wy = pdiff(w, pw; dims=2) / dy
+        ku, kv, kw = ks
+        uy = pdiff(u, pu; dims=2) ./ dy[ku]
+        uz = pdiff(u, pu; dims=3) ./ dz[ku]
+        vx = pdiff(v, pv; dims=1) ./ dx[kv]
+        vz = pdiff(v, pv; dims=3) ./ dz[kv]
+        wx = pdiff(w, pw; dims=1) ./ dx[kw]
+        wy = pdiff(w, pw; dims=2) ./ dy[kw]
         return [wy - vz, uz - wx, vx - uy]
     end
 end
@@ -101,7 +105,7 @@ end
 # end
 
 
-# function fftsdiff(a, padding=zeros(Int, ndims(a), 2); dims)
+# function fftsdiff(a, diffpadvals=zeros(Int, ndims(a), 2); dims)
 #     T = eltype(a)
 #     select = 1:ndims(a) .== dims
 #     n = size(a, dims)
@@ -117,7 +121,7 @@ end
 #     Da = real(ifft(E .* D .* A))
 #     Da = selectdim(Da, dims, 1:n-1)
 
-#     l, r = eachcol(padding)
+#     l, r = eachcol(diffpadvals)
 #     shifts = r - l
 #     zsz = size(a) .* (1 - select) + select |> Tuple
 #     z = zeros(T, zsz)
@@ -135,7 +139,7 @@ end
 # end
 
 # function (m::Del)(a::AbstractArray{<:pumber}, p=*)
-#     @unpack Δ, padding = m
+#     @unpack Δ, diffpadvals = m
 #     n = length(Δ)
 #     if n == 1
 #         return pdiff(a) / Δ[1]

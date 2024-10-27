@@ -29,7 +29,7 @@ for op in (:⊙, :⊘)
     @eval $op(x::S, y::T) where {S<:Map,T<:Map} = bmap($op, x, y)
 end
 
-for op in (:+,)
+for op in (:+, :*)
     @eval Base.$op(x, y::Map) = bmap(Base.$op, y, x)
 end
 for op in (:⊙,)
