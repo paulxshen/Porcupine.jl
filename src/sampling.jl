@@ -9,24 +9,42 @@ function downsample(f, a, ratio::Union{Int,AbstractVector{Int},NTuple{N,Int}}) w
         end for I = CartesianIndices(Tuple(size(a) .÷ ratio))
     ]
 end
+function downsample_by_range(f, a, ranges)
+    sz = Tuple(length.(ranges))
+    [f(a[getindex.(ranges, Tuple(I))...]) for I = CartesianIndices(sz)]
+end
 
-_spacings(r::Real, len) = fill(Int(r), Int(len / r))
-_spacings(v, len) = vec(v)
+_downvec(r::Real, len) = fill(Int(r), Int(len / r))
+_downvec(v::AbstractArray, len) = int(vec(v))
 function downsample(f, a, spacings)
-    spacings = _spacings.(spacings, size(a))
-    @assert all(size(a) .== sum.(spacings))
+    spacings = _downvec.(spacings, size(a))
+    @assert all(size(a) .== int(sum.(spacings)))
     sz = Tuple(length.(spacings))
     stops = cumsum.(vec.(spacings))
     starts = stops - spacings + 1
     [f(a[range.(getindex.(starts, Tuple(I)), getindex.(stops, Tuple(I)))...]) for I = CartesianIndices(sz)]
 end
-downsample(a, ratio) = downsample(mean, a, ratio)
+downsample(a, v) = downsample(mean, a, v)
 
-function upsample(a, ratio)
-    A = zeros(complex(eltype(a)), ratio * size(a))
-    A[Base.OneTo.(size(a))...] .= fft(a)
-    ifft(A)
+_upvec(r::Real, len) = fill(Int(r), Int(len))
+_upvec(v::AbstractArray, len) = int(vec(v))
+function upsample(a, spacings)
+    spacings = _upvec.(spacings, size(a))
+    sz = size(a)
+    stops = cumsum.(vec.(spacings))
+    starts = stops - spacings + 1
+    r = zeros(eltype(a), Tuple(sum.(spacings)))
+    for I = CartesianIndices(sz)
+        r[range.(getindex.(starts, Tuple(I)), getindex.(stops, Tuple(I)))...] .= a[I]
+
+    end
+    r
 end
+# function upsample(a, ratio)
+#     A = zeros(complex(eltype(a)), ratio * size(a))
+#     A[Base.OneTo.(size(a))...] .= fft(a)
+#     ifft(A)
+# end
 
 function indexof(x, ticks)
     i = findfirst(>=(x), ticks)
@@ -37,7 +55,7 @@ end
 
 v2i(x, dx::Real) = x / dx
 v2i(x, deltas) = v2i.(x, deltas)
-v2i(x, deltas::AbstractArray{<:Real}) = indexof(x, cumsum(deltas))
+v2i(x::Real, deltas::AbstractArray{<:Real}) = indexof(x, cumsum(deltas))
 
 # i2v(i, dx::Real) = (i - 0.5) * dx
 # i2v(i, deltas) = i2v.(i, deltas)

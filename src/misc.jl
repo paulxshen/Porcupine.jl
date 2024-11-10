@@ -1,5 +1,6 @@
 Base.Any(x) = x
-Base.vec(x) = [x]
+Base.vec(x) = x
+Base.length(x) = 1
 
 ° = π / 180
 (m::Number)(a...) = m
@@ -27,10 +28,10 @@ ceil(T, x) = Base.ceil.(T, x)
 
 function int(x::Real)
     i = round(Int, x)
-    @assert abs(x - i) < 1e-3
+    @assert abs(x - i) < 5e-2 "$x"
     i
 end
-int(x) = int.(x)
+int(x) = fmap(int, x)
 
 Base.ndims(a) = length(size(a))
 Base.size(x) = (length(x),)
@@ -40,4 +41,19 @@ Base.size(x) = (length(x),)
 
 # Base.Float64(x::List) = f64(x)
 trim(x, dx) = round.(x / dx) * dx
+using ChainRulesCore
+macro ignore_derivatives_vars(ex)
+    quote
+        $(esc(ex)) = ignore_derivatives() do
+            $(esc(ex))
+        end
+    end
+end
 
+macro convert(T, ex)
+    quote
+        $(esc(ex)) = fmap($(esc(ex))) do x
+            convert.($(esc(T)), x)
+        end
+    end
+end
