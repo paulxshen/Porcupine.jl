@@ -8,13 +8,16 @@ Base.getindex(x::Number, k::Text) = x
 gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)
 dropitr(x) = first(x) == last(x) ? first(x) : x
 function adddims(a; dims)
-    sz = ones(Int, length(dims) + ndims(a))
-    dims0 = collect(size(a))
-    for i = 1:length(sz)
-        if i in dims
-        else
-            sz[i] = popfirst!(dims0)
+    sz = ignore_derivatives() do
+        sz = ones(Int, length(dims) + ndims(a))
+        dims0 = collect(size(a))
+        for i = 1:length(sz)
+            if i in dims
+            else
+                sz[i] = popfirst!(dims0)
+            end
         end
+        sz
     end
     reshape(a, Tuple(sz))
 end
@@ -33,9 +36,6 @@ function int(x::Real)
 end
 int(x) = fmap(int, x)
 
-Base.ndims(a) = length(size(a))
-Base.size(x) = (length(x),)
-# Base.length(x) = 1
 
 # Base.convert(T, x) = convert.(T, x)
 

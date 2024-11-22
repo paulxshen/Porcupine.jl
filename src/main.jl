@@ -3,6 +3,7 @@ using Functors: functor
 using Zygote: Buffer
 
 include("ops.jl")
+include("dims.jl")
 include("zero.jl")
 
 include("map/init.jl")

@@ -37,7 +37,9 @@ function getindexf(a, I...)
     else
         _a = a
     end
-    sum([w * _a[int.((_o - o + l) .+ I)...] for (_o, w) = zip(os, ws)])
+    sum([w * _a[ignore_derivatives() do
+        int.((_o - o + l) .+ I)
+    end...] for (_o, w) = zip(os, ws)])
 end
 
 function crop(a, l, r=l)

@@ -12,6 +12,7 @@ export upsample, downsample, downsample_by_range, _downvec, v2i, indexof, i2v
 export symmetric
 export ⊙, ⊘
 export @ignore_derivatives_vars, @convert
+export invperm, permutedims, adddims
 # export round, ceil, floor
 # keys, values, first,
 end # module FDMTK
