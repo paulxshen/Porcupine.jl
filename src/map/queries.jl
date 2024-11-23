@@ -25,7 +25,13 @@ function recursive_getindex(d::Map, k)
     null
 end
 
-Base.getproperty(d::AbstractDict, k::Symbol) = hasproperty(d, k) ? getfield(d, k) : d(k)
+function Base.getproperty(d::AbstractDict, k::Symbol)
+    if hasproperty(d, k)
+        @warn "returning $(typeof(d)) property $k not key $k"
+        getfield(d, k)
+    end
+    d(k)
+end
 
 function (d::Map)(k::Int)
     haskey(d, k) && return d[k]
