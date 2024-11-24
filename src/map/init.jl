@@ -1,7 +1,7 @@
 Base.map(f::Function, s::AbstractSet) = [f(x) for x = s]
 
-namedtuple(d::AbstractDict) = NamedTuple(Pair.(Symbol.(keys(d)), values(d)))
-namedtuple(ps::AbstractVector{<:Pair}) = NamedTuple([Symbol(p[1]) => p[2] for p in ps])
+# namedtuple(d::AbstractDict) = NamedTuple(Pair.(Symbol.(keys(d)), values(d)))
+# namedtuple(ps::AbstractVector{<:Pair}) = NamedTuple([Symbol(p[1]) => p[2] for p in ps])
 namedtuple(x) = NamedTuple(x)
 
 function dict(K, V, ps)
@@ -31,13 +31,13 @@ function ChainRulesCore.rrule(::typeof(namedtuple), ps)
     return y, NamedTuple_pullback
 end
 
-# function ChainRulesCore.rrule(::Type{Pair}, a::Symbol, b)
-#     y = Pair(a, b)
-#     function Pair_pullback(ȳ)
-#         NoTangent(), NoTangent(), ȳ[2]
-#     end
-#     return y, Pair_pullback
-# end
+function ChainRulesCore.rrule(::Type{Pair}, a::Symbol, b)
+    y = Pair(a, b)
+    function Pair_pullback(ȳ)
+        NoTangent(), NoTangent(), ȳ[2]
+    end
+    return y, Pair_pullback
+end
 
 # group(d, k) = namedtuple([_k => d[_k] for _k in ignore_derivatives() do
 #     filter(_k -> startswith(string(_k), string(k)), keys(d))

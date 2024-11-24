@@ -30,7 +30,7 @@ function getindexf(a, I...)
     v = [getindex.(os, i) for i = 1:N]
     l = 1 - minimum.(v)
     r = maximum.(v) + last.(I) - first.(I) - size(a)
-    l, r = Int.(max.(l, 0)), Int.(max.(r, 0))
+    l, r = int.(max.(l, 0)), int.(max.(r, 0))
 
     if any(l .> 0) || any(r .> 0)
         _a = pad(a, :replicate, l, r)

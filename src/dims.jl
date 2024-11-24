@@ -7,6 +7,8 @@ function invperm(v,)
     end
     p
 end
+
+permutedims(a::Number, args...) = a
 function permutedims(a, p, N=length(p))
     n = ndims(a)
     np = length(p)

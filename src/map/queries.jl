@@ -27,8 +27,8 @@ end
 
 function Base.getproperty(d::AbstractDict, k::Symbol)
     if hasproperty(d, k)
-        @warn "returning $(typeof(d)) property $k not key $k"
-        getfield(d, k)
+        # @warn "returning $(typeof(d)) property $k not key $k"
+        return getfield(d, k)
     end
     d(k)
 end
