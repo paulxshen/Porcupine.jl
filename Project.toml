@@ -5,7 +5,6 @@ version = "0.1.44"
 
 [deps]
 ArrayPadding = "fe5ef43c-4912-423d-9170-4bd5cb6a013a"
-CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 FFTW = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
@@ -17,7 +16,6 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 ArrayPadding = "0.1"
-CUDA = "5,6"
 ChainRulesCore = "1"
 DataStructures = "0.18,0.19"
 LinearAlgebra = "1"

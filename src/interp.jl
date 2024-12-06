@@ -10,14 +10,19 @@ function nn(i)
     end]
     return getindex.(aw, 1), getindex.(aw, 2)
 end
-Base.Int(x::AbstractRange) = Int(first(x)):Int(step(x)):Int(last(x))
+function int(x::AbstractRange)
+    i = int(first(x))
+    d = int(step(x))
+    j = int(last(x))
+    d == 0 ? (i:j) : (i:d:j)
+end
 
 function setindexf!(a, v, I...)
     o = first.(I)
     os, ws = nn(o)
     ws = eltype(a).(ws)
     for (_o, w) = zip(os, ws)
-        a[Int.(_o - o .+ I)...] += w * v
+        a[int.(_o - o .+ I)...] += w * v
     end
 end
 

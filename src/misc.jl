@@ -36,7 +36,6 @@ function int(x::Real)
 end
 int(x) = fmap(int, x)
 
-
 # Base.convert(T, x) = convert.(T, x)
 
 # Base.Float64(x::List) = f64(x)

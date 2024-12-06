@@ -1,4 +1,4 @@
-using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, Zygote, ChainRulesCore, CUDA, ArrayPadding
+using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, Zygote, ChainRulesCore, ArrayPadding
 using Functors: functor
 using Zygote: Buffer
 

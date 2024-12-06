@@ -33,5 +33,6 @@ function flatten(c)
     reduce(vcat, flatten.(values(c)))
 end
 
-
-a = propertynames(1im)
+sortkeys(d::NamedTuple) = namedtuple([k => sortkeys(d[k]) for k in sort(keys(d))])
+sortkeys(d::AbstractDict) = dict([k => sortkeys(d[k]) for k in sort(keys(d))])
+sortkeys(x) = x

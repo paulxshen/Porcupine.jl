@@ -1,5 +1,7 @@
-function pdiff(a, l=nothing, r=nothing; dims)
-    I = 1:ndims(a) .== dims
+function pdiff(a, vl=nothing, vr=nothing; dims)
+    sel = 1:ndims(a) .== dims
+    l = !isnothing(vl)
+    r = !isnothing(vr)
     # T = eltype(a)
     # zsz = size(a) .* (1 - select) + select |> Tuple
     # z = zeros(T, zsz)
@@ -10,14 +12,17 @@ function pdiff(a, l=nothing, r=nothing; dims)
     #     # elseif r == 1
     #     return cat(diff(a; dims=dims), z, dims=dims)
     # end
-    a = diff(a; dims)
-    if !isnothing(l)
-        a = pad(a, l, I, 0; dims)
+    _a = Buffer(a, size(a) + (l + r) * sel)
+    # a = diff(a; dims)
+    _a[[i == 0 ? (:) : l+1:size(a, dims)-r for i = sel]...] = diff(a; dims)
+    if l > 0
+        # a = pad(a, l, sel, 0; dims)
+        pad!(a, vl, sel, 0; dims)
     end
-    if !isnothing(r)
-        a = pad(a, r, 0, I; dims)
+    if r > 0
+        pad!(a, vr, 0, sel; dims)
     end
-    a
+    copy(_a)
 end
 pdiff(a, diffpadvals::AbstractMatrix; dims) = pdiff(a, diffpadvals[dims, :]...; dims)
 
