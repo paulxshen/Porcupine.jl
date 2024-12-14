@@ -12,15 +12,15 @@ function pdiff(a, vl=nothing, vr=nothing; dims)
     #     # elseif r == 1
     #     return cat(diff(a; dims=dims), z, dims=dims)
     # end
-    _a = Buffer(a, size(a) + (l + r) * sel)
+    _a = Buffer(a, Tuple(size(a) + (l + r - 1) * sel))
     # a = diff(a; dims)
-    _a[[i == 0 ? (:) : l+1:size(a, dims)-r for i = sel]...] = diff(a; dims)
+    _a[[i == 0 ? (:) : l+1:size(_a, dims)-r for i = sel]...] = diff(a; dims)
     if l > 0
         # a = pad(a, l, sel, 0; dims)
-        pad!(a, vl, sel, 0; dims)
+        pad!(_a, vl, sel, 0)
     end
     if r > 0
-        pad!(a, vr, 0, sel; dims)
+        pad!(_a, vr, 0, sel)
     end
     copy(_a)
 end

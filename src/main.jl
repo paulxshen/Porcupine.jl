@@ -21,6 +21,7 @@ include("misc.jl")
 include("interp.jl")
 include("sampling.jl")
 include("symmetric.jl")
+include("gpu.jl")
 
 # using Pkg
 # pkg"dev C:\Users\pxshe\OneDrive\Desktop\ArrayPadding.jl;up"

@@ -3,6 +3,6 @@ _cpu(x::T) = Array(x)
 _gpu(x::T, cu) = cu(x)
 _gpu(x) = x
 _cpu(x) = x
-gpu(d) = fmap(_gpu, d, T)
+gpu(cu, d) = fmap(x -> _gpu(x, cu), d, T)
 cpu(d) = fmap(_cpu, d, T)
 

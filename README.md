@@ -1,9 +1,18 @@
 # Porcupine.jl
 
-Syntactic sugar for Finite difference operators on scalar and vector fields, including derivative, gradient, divergence, curl and exterior derivative in 1d/2d/3d.  Scalar fields are arrays or singleton vector of an array while vector fields are represented as vector of arrays. Arithmetic and linear algebra operations are overloaded over fields to automatically broadcast.
-
-See FDTDEngine.jl `src/maxwell.jl` for example usage
+Collection of Julia hacks for optimizing developer happiness and automatic differentiation. Most features are implemented as method overloads which are implicitly activated by importing the package. Features include:
+- Allows arithmetic operations between different types including numbers, arrays, tuples, and nested named tuples and dictionaries using recursive broadcasting. 
+- Allows arithmetic operations with `nothing` which is treated like zero. Fixes some `Zygote.jl` errors involving `nothing` tangents.
+- "Fuzzy" indexing for named tuples and dictionaries via () syntax. If exact key is not found, it will try to retrieve:
+    - matching nested keys (arbitrarilly deep)
+    - keys differing by Symbol vs String type
+    - the ith value if the key is an integer i
+- Automatic differentiation (AD) friendly constructors
+    - `dict` for OrderedDict
+    - `namedtuple` for NamedTuple
 
 
 ## Contributors
-Paul Shen, Stanford MS EE, pxshen@alumni.stanford.edu
+Paul Shen
+pxshen@alumni.stanford.edu
+Luminescent AI

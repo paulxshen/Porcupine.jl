@@ -13,6 +13,7 @@ export symmetric
 export ⊙, ⊘
 export @ignore_derivatives_vars, @convert
 export invperm, permutedims, adddims
+export cpu, gpu
 # export round, ceil, floor
 # keys, values, first,
 end # module FDMTK
