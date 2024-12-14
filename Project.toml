@@ -1,7 +1,7 @@
 name = "Porcupine"
 uuid = "3b53a3d7-3f34-4bba-8df2-4717a8b1e972"
 authors = ["Paul Shen <pxshen@alumni.stanford.edu>"]
-version = "0.1.44"
+version = "0.1.45"
 
 [deps]
 ArrayPadding = "fe5ef43c-4912-423d-9170-4bd5cb6a013a"
@@ -17,9 +17,9 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 [compat]
 ArrayPadding = "0.1"
 ChainRulesCore = "1"
-DataStructures = "0.18,0.19"
+DataStructures = "0.18,0.19,0.20,1"
 LinearAlgebra = "1"
 Statistics = "1"
 UnPack = "1"
-Zygote = "0.6,0.7"
+Zygote = "0.6,0.7,0.8,1"
 julia = "1"
