@@ -1,7 +1,6 @@
 module Porcupine
 include("main.jl")
 export Map, List, Collection, Container, Text
-export cdiff, grad, hess, Del # Laplacian#, Op, Gauss
 export dict, namedtuple
 export recursive_getindex, approx_getindex
 export getindexf, setindexf!, crop

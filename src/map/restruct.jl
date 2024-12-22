@@ -5,6 +5,13 @@ end
 function kmap(f, x::AbstractDict)
     dict([k => f(x[k]) for k in keys(x)])
 end
+
+function _kmap(f::Function, x, y)
+    Pair.(keys(x), broadcast(f, values(x), values(y)))
+end
+kmap(f::Function, x::NamedTuple, y) = namedtuple(_kmap(f, x, y))
+kmap(f::Function, x::AbstractDict, y) = dict(_kmap(f, x, y))
+
 function fmap(f, d::Map, T=Union{})
     isa(d, T) && return f(d)
     kmap(d) do v

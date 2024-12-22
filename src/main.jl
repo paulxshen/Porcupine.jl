@@ -1,6 +1,5 @@
-using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, Zygote, ChainRulesCore, ArrayPadding
+using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, ChainRulesCore, ArrayPadding
 using Functors: functor
-using Zygote: Buffer
 
 include("ops.jl")
 include("dims.jl")
@@ -12,13 +11,11 @@ include("map/ops.jl")
 include("map/queries.jl")
 include("map/restruct.jl")
 
-include("vecfields/ops.jl")
-include("vecfields/del.jl")
 
 include("string.jl")
 include("float.jl")
 include("misc.jl")
-include("interp.jl")
+include("arrays.jl")
 include("sampling.jl")
 include("symmetric.jl")
 include("gpu.jl")

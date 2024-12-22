@@ -59,10 +59,8 @@ function crop(a, l, r=l)
 end
 crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 
-# interp(a, I) = getindexf(a, I...)
-# Base.getindex(a::AbstractArray, i::AbstractFloat) = interp(a, [i])
-# Base.getindex(a::AbstractArray, i::AbstractFloat, j::AbstractFloat) = interp(a, [i, j])
-# Base.getindex(a::AbstractArray, i::AbstractFloat, j::AbstractFloat, k::AbstractFloat) = interp(a, [i, j, k])
-# Base.getindex(a::AbstractArray, v::AbstractVector{<:AbstractFloat}) = interp(a, v)
-
-
+(x::Union{Number,Nothing})(args...) = x
+(a::AbstractArray)(args::Vararg{<:Union{S,Colon,UnitRange{T}}}) where {S<:Integer,T<:Integer} = a[args...]
+# ::Vararg{<:Union{Integer,Colon,AbstractRange}}
+(a::AbstractArray)(args...) = getindexf(a, args...)
+(a::AbstractArray)(::Text) = a
