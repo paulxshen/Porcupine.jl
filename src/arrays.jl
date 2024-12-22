@@ -60,7 +60,10 @@ end
 crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 
 (x::Union{Number,Nothing})(args...) = x
-(a::AbstractArray)(args::Vararg{<:Union{S,Colon,UnitRange{T}}}) where {S<:Integer,T<:Integer} = a[args...]
+(a::AbstractArray)(args::Vararg{<:Index}) = a[args...]
 # ::Vararg{<:Union{Integer,Colon,AbstractRange}}
 (a::AbstractArray)(args...) = getindexf(a, args...)
 (a::AbstractArray)(::Text) = a
+
+(t::Tuple)(args::Vararg{<:Index}) = t[args...]
+(t::Tuple)(::Text) = t

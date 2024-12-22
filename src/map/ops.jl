@@ -29,4 +29,4 @@ for op in (:⊘,)
         end
 end
 
--(::Nothing, y::Union{AbstractDict,NamedTuple}) = -y
+Base.:-(::Nothing, y::Union{AbstractDict,NamedTuple}) = -y
