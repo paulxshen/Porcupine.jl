@@ -6,6 +6,8 @@ function kmap(f, x::AbstractDict)
     dict([k => f(x[k]) for k in keys(x)])
 end
 
+broadcast(::typeof(+), args...) = Base.broadcast(+, filter(!isempty, args)...)
+broadcast(args...) = Base.broadcast(args...)
 function _kmap(f::Function, x, y)
     Pair.(keys(x), broadcast(f, values(x), values(y)))
 end

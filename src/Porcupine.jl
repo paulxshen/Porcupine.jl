@@ -1,7 +1,7 @@
 module Porcupine
 include("main.jl")
 export Map, List, Collection, Container, Text
-export dict, namedtuple
+export dict, namedtuple, regex
 export recursive_getindex, approx_getindex
 export getindexf, setindexf!, crop
 export trim, fmap, kmap, leaves, flatten, sortkeys
@@ -14,5 +14,5 @@ export @ignore_derivatives_vars, @convert
 export invperm, permutedims, adddims
 export cpu, gpu
 # export round, ceil, floor
-# keys, values, first,
+# export keys, values, pairs, first
 end # module FDMTK

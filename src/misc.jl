@@ -1,7 +1,8 @@
 Base.Any(x) = x
 Base.vec(x) = x
 Base.length(x) = 1
-
+Base.sort(x) = sort(collect(x))
+pairs(x) = [k => x[k] for k in keys(x)]
 ° = π / 180
 (m::Number)(a...) = m
 Base.getindex(x::Number, k::Text) = x

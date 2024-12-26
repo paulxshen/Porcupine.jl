@@ -32,6 +32,7 @@ function Base.getproperty(d::AbstractDict, k::Symbol)
     end
     d(k)
 end
+# Base.getproperty(d::NamedTuple, k) = d(k)
 
 function (d::Map)(k::Int)
     haskey(d, k) && return d[k]
@@ -42,11 +43,12 @@ end
 
 _alt(x::Symbol) = string(x)
 _alt(x::String) = Symbol(x)
-function (d::Map)(k::Text)
+function (d::Map)(k::Text, v=null)
     r = recursive_getindex(d, k)
     r != null && return r
     r = recursive_getindex(d, _alt(k))
     r != null && return r
+    v != null && return v
     error("$k not found, even recursively")
 end
 
