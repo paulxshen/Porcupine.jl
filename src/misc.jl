@@ -30,9 +30,12 @@ floor(T, x) = Base.floor.(T, x)
 ceil(x) = Base.ceil.(Int, x)
 ceil(T, x) = Base.ceil.(T, x)
 
-function int(x::Real)
+function int(x::Real, tol=0.02)
     i = round(Int, x)
-    @assert abs(x - i) < 5e-2 "$x"
+
+    d = abs(x - i)
+
+    @assert d < tol || d / abs(x) < tol "$x"
     i
 end
 int(x) = fmap(int, x)
