@@ -6,9 +6,11 @@ function kmap(f, x::AbstractDict)
     dict([k => f(x[k]) for k in keys(x)])
 end
 
-broadcast(::typeof(+), args...) = Base.broadcast(+, filter(!isempty, args)...)
-broadcast(args...) = Base.broadcast(args...)
+# broadcast(::typeof(+), args...) = Base.broadcast(+, filter(!isempty, args)...)
+# broadcast(args...) = Base.broadcast(args...)
 function _kmap(f::Function, x, y)
+    isempty(x) && return y
+    isempty(y) && return x
     Pair.(keys(x), broadcast(f, values(x), values(y)))
 end
 kmap(f::Function, x::NamedTuple, y) = namedtuple(_kmap(f, x, y))
