@@ -13,6 +13,7 @@ export ⊙, ⊘
 export @ignore_derivatives_vars, @convert
 export invperm, permutedims, adddims
 export cpu, gpu
+export gc, timepassed
 # export round, ceil, floor
 # export keys, values, pairs, first
 end # module FDMTK
