@@ -62,22 +62,26 @@ macro convert(T, ex)
 end
 
 function gc(f=0.2; show=false)
-    t0 = time()
-    if !haskey(ENV, "gctime") || t0 > parse(Float64, ENV["gctime"])
-        GC.gc(false)
-        t = time()
-        show && println("""GC took $(t - t0) seconds""")
-        ENV["gctime"] = t + (t - t0) * (1 - f) / f
+    ignore_derivatives() do
+        t0 = time()
+        if !haskey(ENV, "gctime") || t0 > parse(Float64, ENV["gctime"])
+            GC.gc(false)
+            t = time()
+            show && println("""GC took $(t - t0) seconds""")
+            ENV["gctime"] = t + (t - t0) * (1 - f) / f
+        end
     end
 end
 
 function timepassed()
-    t = time()
-    if haskey(ENV, "time")
-        t0 = parse(Float64, ENV["time"])
-    else
-        t0 = t
+    ignore_derivatives() do
+        t = time()
+        if haskey(ENV, "time")
+            t0 = parse(Float64, ENV["time"])
+        else
+            t0 = t
+        end
+        ENV["time"] = t
+        t - t0
     end
-    ENV["time"] = t
-    t - t0
 end

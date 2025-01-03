@@ -1,4 +1,4 @@
-using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, ChainRulesCore, ArrayPadding
+using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, ChainRulesCore, ArrayPadding, MLDataDevices
 using Functors: functor
 
 include("ops.jl")
