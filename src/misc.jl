@@ -85,3 +85,5 @@ function timepassed()
         t - t0
     end
 end
+
+constructor(::Type{<:Array}) = Array
