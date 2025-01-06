@@ -1,5 +1,6 @@
 using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, ChainRulesCore, ArrayPadding, MLDataDevices, BFloat16s
 using Functors: functor
+using ArrayPadding: constructor
 
 include("ops.jl")
 include("dims.jl")

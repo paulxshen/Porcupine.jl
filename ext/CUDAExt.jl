@@ -1,7 +1,6 @@
 module CUDAExt
 using CUDA, Porcupine, ChainRulesCore
 
-constructor(::Type{<:CuArray},) = cu
 function ChainRulesCore.rrule(::typeof(cu), a::Array{<:AbstractFloat})
     # @show ps
     y = cu(a)

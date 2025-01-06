@@ -9,9 +9,13 @@ function downsample(f, a, ratio::Union{Int,AbstractVector{Int},NTuple{N,Int}}) w
         end for I = CartesianIndices(Tuple(size(a) .÷ ratio))
     ]
 end
-function downsample_by_range(f, a, ranges)
+
+function downsample_by_range(f, T, a, ranges)
     sz = Tuple(length.(ranges))
-    [f(a[getindex.(ranges, Tuple(I))...]) for I = CartesianIndices(sz)]
+    [f(T.(a[getindex.(ranges, Tuple(I))...])) for I = CartesianIndices(sz)]
+end
+function downsample_by_range(f, a::AbstractArray{T}, ranges) where {T}
+    downsample_by_range(f, T, a, ranges)
 end
 
 _downvec(r::Real, len) = fill(Int(r), Int(len / r))
