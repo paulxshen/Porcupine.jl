@@ -1,14 +1,23 @@
-function nn(i)
+function nn(i; approx=false)
     p = ignore_derivatives() do
         floor.(Int, i)
     end
     q = ignore_derivatives() do
         ceil.(Int, i)
     end
-    aw = [(j, prod(1 - abs.(i - j))) for j = ignore_derivatives() do
-        Base.product(unique.(zip(p, q))...)
-    end]
-    return getindex.(aw, 1), getindex.(aw, 2)
+    # p == q && return ([p], [1])
+
+    aw = [(j, prod(1 - abs.(i - j))) for j = @ignore_derivatives Base.product(unique.(zip(p, q))...)]
+    if approx
+        j1, w1 = aw[1]
+        j2, w2 = aw[end]
+        w = w1 + w2
+        w1 /= w
+        w2 /= w
+        [j1, j2], [w1, w2]
+    else
+        getindex.(aw, 1), getindex.(aw, 2)
+    end
 end
 function int(x::AbstractRange)
     i = int(first(x))
@@ -17,18 +26,21 @@ function int(x::AbstractRange)
     d == 0 ? (i:j) : (i:d:j)
 end
 
-function setindexf!(a, v, I...)
+function _setindexf!(T, a, v, I...; approx)
     o = first.(I)
-    os, ws = nn(o)
-    ws = eltype(a).(ws)
+    os, ws = nn(o; approx)
     for (_o, w) = zip(os, ws)
+        w = T(w)
         a[int.(_o - o .+ I)...] += w * v
     end
 end
+function setindexf!(a::AbstractArray{T}, v, I...; approx=false) where {T}
+    _setindexf!(T, a, v, I...; approx)
+end
 
-function getindexf(a, I...)
+function getindexf(a, I...; approx=false)
     o = first.(I)
-    os, ws = nn(o)
+    os, ws = nn(o; approx)
     ws = eltype(a).(ws)
     N = ndims(a)
 
