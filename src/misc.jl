@@ -85,3 +85,5 @@ function timepassed()
         t - t0
     end
 end
+
+AUTODIFF() = !haskey(ENV, "autodiff") || ENV["autodiff"] == "1"

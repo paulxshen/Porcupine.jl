@@ -13,7 +13,7 @@ export ⊙, ⊘
 export @nogradvars, @convert
 export invperm, permutedims, adddims
 export cpu, gpu
-export gc, timepassed
+export gc, timepassed, AUTODIFF
 export constructor
 # export round, ceil, floor
 # export keys, values, pairs, first
