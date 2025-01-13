@@ -10,7 +10,7 @@ export int
 export upsample, downsample, downsample_by_range, _downvec, v2i, indexof, i2v
 export symmetric
 export ⊙, ⊘
-export @nogradvars, @convert
+export @nograd, @convert
 export invperm, permutedims, adddims
 export cpu, gpu
 export gc, timepassed, AUTODIFF

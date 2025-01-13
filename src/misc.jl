@@ -45,7 +45,7 @@ int(x) = fmap(int, x)
 # Base.Float64(x::List) = f64(x)
 trim(x, dx) = round.(x / dx) * dx
 using ChainRulesCore
-macro nogradvars(ex)
+macro nograd(ex)
     quote
         $(esc(ex)) = ignore_derivatives() do
             $(esc(ex))
