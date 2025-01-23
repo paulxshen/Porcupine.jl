@@ -1,4 +1,4 @@
-for F in (:(Base.Float16), :(Base.Float32), :(Base.Float64), :(BFloat16s.BFloat16))
+for F in (:(Base.Float16), :(Base.Float32), :(Base.Float64),)# :(BFloat16s.BFloat16))
     @eval Base.convert(::Type{$F}, x::Text) = parse($F, string(x))
     @eval $F(x::Text) = parse($F, string(x))
     @eval $F(x::Container) = ($F).(x)

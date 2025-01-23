@@ -5,6 +5,7 @@ Map = Union{AbstractDict,NamedTuple}
 Collection = Union{Container,Map}
 Text = Union{String,Symbol,AbstractChar}
 Index = Union{S,Colon,UnitRange{T}} where {S<:Integer,T<:Integer}
+Func = Union{Function,Type}
 
 function Base.:+(x, y)
     x == 0 && return y

@@ -1,4 +1,5 @@
-Base.ndims(a) = length(size(a))
+# Base.ndims(a) = length(size(a))
+Base.ndims(::Tuple) = 1
 Base.size(x) = (length(x),)
 function invperm(v,)
     p = similar(v)
