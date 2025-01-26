@@ -18,6 +18,7 @@ function _kmap(f::Func, x, y)
 end
 kmap(f::Func, x::NamedTuple, y) = namedtuple(_kmap(f, x, y))
 kmap(f::Func, x::AbstractDict, y) = dict(_kmap(f, x, y))
+
 function fmap(f, d::Map, T=Union{})
     isa(d, T) && return f(d)
     kmap(d) do v

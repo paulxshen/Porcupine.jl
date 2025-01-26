@@ -15,6 +15,7 @@ export invperm, permutedims, adddims
 export cpu, gpu
 export gc, timepassed, AUTODIFF
 export constructor
+export packxyz, unpackxyz
 # export round, ceil, floor
 # export keys, values, pairs, first
 end # module FDMTK
