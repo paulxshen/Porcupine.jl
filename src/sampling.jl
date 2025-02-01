@@ -10,13 +10,18 @@ function downsample(f, a, ratio::Union{Int,AbstractVector{Int},NTuple{N,Int}}) w
     ]
 end
 
-function downsample_by_range(f, T, a, ranges)
-    sz = Tuple(length.(ranges))
-    [f(T.(a[getindex.(ranges, Tuple(I))...])) for I = CartesianIndices(sz)]
+downsample_by_range(f, a::AbstractArray, ranges; kw...) = downsample_by_range(f, (a,), ranges; kw...)
+function downsample_by_range(f, as::Tuple, ranges, ; withindex=false)
+    map(Base.product(ranges...)) do I
+        v = map(as) do a
+            a(I...)
+        end
+        withindex ? f(v..., I) : f(v...)
+    end
 end
-function downsample_by_range(f, a::AbstractArray{T}, ranges) where {T}
-    downsample_by_range(f, T, a, ranges)
-end
+# function downsample_by_range(f, ranges, a::AbstractArray{T}, as...) where {T}
+#     downsample_by_range(f, T, a, ranges, as...)
+# end
 
 _downvec(r::Real, len) = fill(Int(r), Int(len / r))
 _downvec(v::AbstractArray, len) = int(vec(v))

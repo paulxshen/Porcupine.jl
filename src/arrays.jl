@@ -41,7 +41,10 @@ end
 function getindexf(a, I...; approx=false)
     o = first.(I)
     os, ws = nn(o; approx)
-    ws = eltype(a).(ws)
+    T = eltype(a)
+    if !(T <: Integer)
+        ws = T.(ws)
+    end
     N = ndims(a)
 
     v = [getindex.(os, i) for i = 1:N]
@@ -59,6 +62,9 @@ function getindexf(a, I...; approx=false)
     end...] for (_o, w) = zip(os, ws)])
 end
 
+getindexs(s::Number, i) = s * i
+getindexs(s::AbstractVector, i) = i == 0 ? 0 : getindexf(s, i)
+
 function crop(a, l, r=l)
     if all(l .== 0) && all(r .== 0)
         return a
@@ -71,6 +77,8 @@ function crop(a, l, r=l)
 end
 crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 
+Base.diff(x::Number; kw...) = 0
+
 (x::Union{Number,Nothing})(args...) = x
 (a::AbstractArray)(args::Vararg{<:Index}) = a[args...]
 (a::AbstractArray)(args...) = getindexf(a, args...)
@@ -78,3 +86,44 @@ crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 
 (t::Tuple)(args::Vararg{<:Index}) = t[args...]
 (t::Tuple)(::Text) = t
+Base.Array(x) = x
+
+function imnormal(a)
+    N = ndims(a)
+    n = map(1:N) do dims
+        -sum(diff(a; dims))
+    end
+
+    Z = norm(n)
+    if Z > 1.0f-4
+        n /= Z
+    else
+        n *= 0
+    end
+    n
+end
+# sz = size(d)
+# dmin, dmax = extrema(d)
+# if !(dmin + TOL < 0 < dmax - TOL)
+#     sum(d) / size(d, dims)
+# else
+#     global _aa = _a
+#     volume(_aa) |> display
+#     error()
+#     dm = d .* (d .< 0)
+#     dp = d .* (d .> 0)
+#     centers = sum.(map((dm, dp)) do m
+#         m = abs.(m)
+#         m .* Tuple.(CartesianIndices(m))
+#     end) ./ abs.(sum.((dm, dp)))
+#     # @show centers
+#     distm, distp = norm.(centers .- (sz / 2 + 0.5,))
+#     @show distm, distp
+#     if distm ≈ distp
+#         0
+#     elseif distm < distp
+#         sum(dm) / size(dm, dims)
+#     else
+#         sum(dp) / size(dp, dims)
+#     end
+# end

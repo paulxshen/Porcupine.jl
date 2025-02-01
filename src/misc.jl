@@ -4,7 +4,7 @@ Base.length(x) = 1
 Base.sort(x) = sort(collect(x))
 pairs(x) = [k => x[k] for k in keys(x)]
 ° = π / 180
-(m::Number)(a...) = m
+
 Base.getindex(x::Number, k::Text) = x
 gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)
 dropitr(x) = first(x) == last(x) ? first(x) : x
@@ -61,15 +61,33 @@ macro convert(T, ex)
     end
 end
 
-function gc(f=0.2; show=false)
+function gc(ratio=4.0; show=false)
     ignore_derivatives() do
-        t0 = time()
-        if !haskey(ENV, "gctime") || t0 > parse(Float64, ENV["gctime"])
-            GC.gc(false)
-            t = time()
-            show && println("""GC took $(t - t0) seconds""")
-            ENV["gctime"] = t + (t - t0) * (1 - f) / f
+        t = time()
+        if !haskey(ENV, "gc")
+            ENV["gc"] = "0,0,0,0"
         end
+        # for (k, full) = zip(("gctimefull", "gctime"), (true, false))
+        Tf, T, df, d = parse.(Float64, split(ENV["gc"], ","))
+        if t > Tf
+            GC.gc(true)
+            t0 = t
+            t = time()
+            # show && println("""GC took $(t - t0) seconds""")
+            df = (t - t0) * ratio
+            Tf = t + df
+            T = t + d
+        elseif t > T
+            GC.gc(false)
+            t0 = t
+            t = time()
+            d = (t - t0) * ratio
+            T = t + d
+            Tf = max(Tf, T)
+        else
+            return
+        end
+        ENV["gc"] = "$(Tf),$(T),$(df),$(d)"
     end
 end
 

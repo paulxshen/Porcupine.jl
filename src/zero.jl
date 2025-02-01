@@ -23,4 +23,4 @@ Base.:*(x, y::Nothing) = nothing
 Base.:*(x::Nothing, y) = nothing
 Base.:*(x::Nothing, y::Nothing) = nothing
 
-# Base.zero(::Type{Any}) = 0
+Base.zero(x) = 0
