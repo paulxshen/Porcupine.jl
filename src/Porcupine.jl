@@ -16,7 +16,7 @@ export cpu, gpu
 export gc, timepassed, AUTODIFF
 export constructor
 export packxyz, unpackxyz
-export imnormal
+export imnormal, getbbox
 export togreek, fromgreek
 # export round, ceil, floor
 # export keys, values, pairs, first

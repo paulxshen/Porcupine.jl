@@ -127,3 +127,19 @@ end
 #         sum(dp) / size(dp, dims)
 #     end
 # end
+
+function getbbox(a)
+    lb = map(enumerate(size(a))) do (dim, n)
+        for i = 1:n
+            s = selectdim(a, dim, i)
+            any(!iszero, s) && return i
+        end
+    end
+    ub = map(enumerate(size(a))) do (dim, n)
+        for i = n:-1:1
+            s = selectdim(a, dim, i)
+            any(!iszero, s) && return i
+        end
+    end
+    hcat(lb, ub)
+end
