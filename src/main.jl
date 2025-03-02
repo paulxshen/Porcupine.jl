@@ -3,9 +3,12 @@ using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, ChainRulesCor
 using Functors: functor
 using ArrayPadding: constructor
 
+include("types.jl")
 include("ops.jl")
 include("dims.jl")
 include("zero.jl")
+include("numbers.jl")
+include("indexing.jl")
 
 include("map/init.jl")
 include("map/iters.jl")
@@ -13,6 +16,7 @@ include("map/ops.jl")
 include("map/queries.jl")
 include("map/restruct.jl")
 
+include("grid.jl")
 
 include("string.jl")
 include("float.jl")

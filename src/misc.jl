@@ -23,22 +23,7 @@ function adddims(a; dims)
     reshape(a, Tuple(sz))
 end
 
-round(x) = Base.round.(Int, x)
-round(T, x) = Base.round.(T, x)
-floor(x) = Base.floor.(Int, x)
-floor(T, x) = Base.floor.(T, x)
-ceil(x) = Base.ceil.(Int, x)
-ceil(T, x) = Base.ceil.(T, x)
 
-function int(x::Real, tol=0.02)
-    i = round(Int, x)
-
-    d = abs(x - i)
-
-    @assert d < tol || d / abs(x) < tol "$x"
-    i
-end
-int(x) = fmap(int, x)
 
 # Base.convert(T, x) = convert.(T, x)
 

@@ -1,37 +1,40 @@
 Base.map(f::Func, x::AbstractDict) = map(f, values(x))
 
-function kmap(g::Func, f::Func, x::NamedTuple)
-    namedtuple([g(k) => f(x[k]) for k in keys(x)])
+function kvmap(f::Func, x::NamedTuple)
+    namedtuple([f(k, v) for (k, v) = pairs(x)])
 end
-kmap(f::Func, x::NamedTuple) = kmap(identity, f, x)
-function kmap(g::Func, f::Func, x::AbstractDict)
-    dict([g(k) => f(x[k]) for k in keys(x)])
+function kvmap(f::Func, x::AbstractDict)
+    dict([f(k, v) for (k, v) = pairs(x)])
 end
-kmap(f::Func, x::AbstractDict) = kmap(identity, f, x)
+vmap(f::Func, x::NamedTuple) = kvmap((k, v) -> (k, f(v)), x)
+vmap(f::Func, x::AbstractDict) = kvmap((k, v) -> (k, f(v)), x)
 
 # broadcast(::typeof(+), args...) = Base.broadcast(+, filter(!isempty, args)...)
 # broadcast(args...) = Base.broadcast(args...)
-function _kmap(f::Func, x, y)
+function _vmap(f::Func, x, y)
     isempty(x) && return y
     isempty(y) && return x
     Pair.(keys(x), broadcast(f, values(x), values(y)))
 end
-kmap(f::Func, x::NamedTuple, y) = namedtuple(_kmap(f, x, y))
-kmap(f::Func, x::AbstractDict, y) = dict(_kmap(f, x, y))
+vmap(f::Func, x::NamedTuple, y) = namedtuple(_vmap(f, x, y))
+vmap(f::Func, x::AbstractDict, y) = dict(_vmap(f, x, y))
 
-function fmap(f, d::Map, T=Union{})
+_T = Union{Number,Text}
+function fmap(f, d::Map, T=_T)
     isa(d, T) && return f(d)
-    kmap(d) do v
+    vmap(d) do v
         fmap(f, v, T)
     end
 end
-function fmap(f, a::Container, T=Union{})
+function fmap(f, a::Container, T=_T)
     isa(a, T) && return f(a)
     fmap.((f,), a, (T,))
 end
-function fmap(f, x, T=Union{})
-    if isa(x, Union{Number,Text,T}) || isempty(propertynames(x))
+function fmap(f, x, T=_T)
+    if isa(x, T)
         return f(x)
+    elseif isempty(propertynames(x))
+        return x
     end
     xs, re = functor(x)
     re(fmap(f, xs, T))

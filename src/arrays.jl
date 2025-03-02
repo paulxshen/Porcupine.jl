@@ -1,24 +1,4 @@
-function nn(i; approx=false)
-    p = ignore_derivatives() do
-        floor.(Int, i)
-    end
-    q = ignore_derivatives() do
-        ceil.(Int, i)
-    end
-    # p == q && return ([p], [1])
 
-    aw = [(j, prod(1 - abs.(i - j))) for j = @ignore_derivatives Base.product(unique.(zip(p, q))...)]
-    if approx
-        j1, w1 = aw[1]
-        j2, w2 = aw[end]
-        w = w1 + w2
-        w1 /= w
-        w2 /= w
-        [j1, j2], [w1, w2]
-    else
-        getindex.(aw, 1), getindex.(aw, 2)
-    end
-end
 function int(x::AbstractRange)
     i = int(first(x))
     d = int(step(x))
@@ -26,41 +6,7 @@ function int(x::AbstractRange)
     d == 0 ? (i:j) : (i:d:j)
 end
 
-function _setindexf!(T, a, v, I...; approx)
-    o = first.(I)
-    os, ws = nn(o; approx)
-    for (_o, w) = zip(os, ws)
-        w = T(w)
-        a[int.(_o - o .+ I)...] += w * v
-    end
-end
-function setindexf!(a::AbstractArray{T}, v, I...; approx=false) where {T}
-    _setindexf!(T, a, v, I...; approx)
-end
 
-function getindexf(a, I...; approx=false)
-    o = first.(I)
-    os, ws = nn(o; approx)
-    T = eltype(a)
-    if !(T <: Integer)
-        ws = T.(ws)
-    end
-    N = ndims(a)
-
-    v = [getindex.(os, i) for i = 1:N]
-    l = 1 - minimum.(v)
-    r = maximum.(v) + last.(I) - first.(I) - size(a)
-    l, r = int.(max.(l, 0)), int.(max.(r, 0))
-
-    if any(l .> 0) || any(r .> 0)
-        _a = pad(a, :replicate, l, r)
-    else
-        _a = a
-    end
-    sum([w * _a[ignore_derivatives() do
-        int.((_o - o + l) .+ I)
-    end...] for (_o, w) = zip(os, ws)])
-end
 
 getindexs(s::Number, i) = s * i
 getindexs(s::AbstractVector, i) = i == 0 ? 0 : getindexf(s, i)
@@ -79,7 +25,7 @@ crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 
 Base.diff(x::Number; kw...) = 0
 
-(x::Union{Number,Nothing})(args...) = x
+(x::Scalar)(args...) = x
 (a::AbstractArray)(args::Vararg{<:Index}) = a[args...]
 (a::AbstractArray)(args...) = getindexf(a, args...)
 (a::AbstractArray)(::Text) = a
@@ -143,3 +89,6 @@ function getbbox(a)
     end
     hcat(lb, ub)
 end
+
+I2 = Matrix(I, 2, 2)
+I3 = Matrix(I, 3, 3)

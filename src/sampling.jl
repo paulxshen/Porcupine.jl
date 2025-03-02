@@ -55,19 +55,6 @@ end
 #     ifft(A)
 # end
 
-function indexof(x, ticks)
-    x == ticks[1] && return 1
-    x == ticks[end] && return length(ticks)
-    i = findfirst(>(x), ticks)
-    a = ticks[i-1]
-    x == a && return i - 1
-    b = ticks[i]
-    i - 1 + (x - a) / (b - a)
-end
-
-v2i(x, dx::Real) = x / dx
-v2i(x, deltas) = v2i.(x, deltas)
-v2i(x::Real, deltas::AbstractArray{<:Real}) = indexof(x, vcat(0, cumsum(deltas))) - 1
 
 # i2v(i, dx::Real) = (i - 0.5) * dx
 # i2v(i, deltas) = i2v.(i, deltas)

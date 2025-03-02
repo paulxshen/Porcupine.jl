@@ -13,11 +13,11 @@ function approx_getindex(d, k)
 end
 
 
-recursive_getindex(d, k) = null
-function recursive_getindex(d::Map, k)
+getindexr(d, k) = null
+function getindexr(d::Map, k)
     haskey(d, k) && return d[k]
     for v = values(d)
-        v = recursive_getindex(v, k)
+        v = getindexr(v, k)
         if v != null
             return v
         end
@@ -44,20 +44,20 @@ end
 _alt(x::Symbol) = string(x)
 _alt(x::String) = Symbol(x)
 function (d::Map)(k::Text, v=null)
-    r = recursive_getindex(d, k)
+    r = getindexr(d, k)
     r != null && return r
-    r = recursive_getindex(d, _alt(k))
+    r = getindexr(d, _alt(k))
     r != null && return r
     v != null && return v
     error("$k not found, even recursively")
 end
 
 function (d::Map)(k::Real)
-    r = recursive_getindex(d, k)
+    r = getindexr(d, k)
     r != null && return r
-    r = recursive_getindex(d, Symbol(k))
+    r = getindexr(d, Symbol(k))
     r != null && return r
-    r = recursive_getindex(d, string(k))
+    r = getindexr(d, string(k))
     r != null && return r
     r = approx_getindex(d, k)
     r != null && return r
