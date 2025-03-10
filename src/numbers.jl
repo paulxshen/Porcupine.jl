@@ -7,6 +7,8 @@ function int(x::Real, tol=0.01)
     @assert d < tol "$x is not an integer within tolerance $tol"
     i
 end
+int(x::Float16) = int(x, 0.1)
+int(x::Float32) = int(x, 0.01)
 
 int(x) = fmap(int, x)
 

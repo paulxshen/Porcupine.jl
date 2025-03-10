@@ -92,5 +92,7 @@ end
 AUTODIFF() = !haskey(ENV, "autodiff") || ENV["autodiff"] == "1"
 
 
+BREAK = "----------------------------------------"
+DBREAK = "========================================"
 disp(x::Number) = format(x; commas=true, precision=3)
 disp(x) = x
