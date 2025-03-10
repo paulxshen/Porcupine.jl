@@ -1,4 +1,5 @@
-
+nn(I::AbstractVector{<:Integer}) = [(I, 1)]
+nn(I::NTuple{N,<:Integer}) where {N} = [(I, 1)]
 function nn(i)
     p = ignore_derivatives() do
         floor.(Int, i)
@@ -15,11 +16,16 @@ _size(::Scalar) = 1
 _size(a) = size(a)
 _I(s, v::Scalar) = s
 _I(s, v) = range.(s, s .+ size(v) .- 1)
-function place!(a, v, start)
+function place!(a, v, start; additive=true)
     startws = nn(start)
     I = _I(start, v)
     for (s, w) = startws
-        a[int.(s - start .+ I)...] += w * v
+        I1 = int.(s - start + I)
+        if !additive
+            a[I1...] = w * v
+        else
+            a[I1...] += w * v
+        end
     end
     a
 end

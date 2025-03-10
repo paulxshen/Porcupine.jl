@@ -1,13 +1,15 @@
 Base.map(f::Func, x::AbstractDict) = map(f, values(x))
 
 function kvmap(f::Func, x::NamedTuple)
-    namedtuple([f(k, v) for (k, v) = pairs(x)])
+    # namedtuple([f(k, v) for (k, v) = pairs(x)])
+    namedtuple([f(k, x[k]) for k = keys(x)])
 end
 function kvmap(f::Func, x::AbstractDict)
-    dict([f(k, v) for (k, v) = pairs(x)])
+    dict([f(k, x[k]) for k = keys(x)])
+    # dict([f(k, v) for (k, v) = pairs(x)])
 end
-vmap(f::Func, x::NamedTuple) = kvmap((k, v) -> (k, f(v)), x)
-vmap(f::Func, x::AbstractDict) = kvmap((k, v) -> (k, f(v)), x)
+vmap(f::Func, x::NamedTuple) = kvmap((k, v) -> k => f(v), x)
+vmap(f::Func, x::AbstractDict) = kvmap((k, v) -> k => f(v), x)
 
 # broadcast(::typeof(+), args...) = Base.broadcast(+, filter(!isempty, args)...)
 # broadcast(args...) = Base.broadcast(args...)

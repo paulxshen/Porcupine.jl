@@ -19,5 +19,6 @@ export constructor
 export packxyz, unpackxyz
 export imnormal, getbbox
 export togreek, fromgreek
+export disp
 # export keys, values, pairs, first
 end # module FDMTK

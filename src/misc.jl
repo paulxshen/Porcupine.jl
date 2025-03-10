@@ -90,3 +90,7 @@ function timepassed()
 end
 
 AUTODIFF() = !haskey(ENV, "autodiff") || ENV["autodiff"] == "1"
+
+
+disp(x::Number) = format(x; commas=true, precision=3)
+disp(x) = x
