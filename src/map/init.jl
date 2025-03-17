@@ -31,12 +31,14 @@ function ChainRulesCore.rrule(::typeof(namedtuple), ps)
     return y, NamedTuple_pullback
 end
 
-function ChainRulesCore.rrule(::Type{Pair}, a::Str, b)
-    y = Pair(a, b)
-    function Pair_pullback(ȳ)
-        NoTangent(), NoTangent(), ȳ[2]
+for T = (:Str, :Number, :AbstractFloat)
+    @eval function ChainRulesCore.rrule(::Type{Pair}, a::$T, b)
+        y = Pair(a, b)
+        function Pair_pullback(ȳ)
+            NoTangent(), NoTangent(), ȳ[2]
+        end
+        return y, Pair_pullback
     end
-    return y, Pair_pullback
 end
 
 regex(args...) = @ignore_derivatives Regex(args...)
