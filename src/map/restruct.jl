@@ -21,7 +21,7 @@ end
 vmap(f::Func, x::NamedTuple, y) = namedtuple(_vmap(f, x, y))
 vmap(f::Func, x::AbstractDict, y) = dict(_vmap(f, x, y))
 
-_T = Union{Number,Text}
+_T = Union{Number,Str}
 function fmap(f, d::Map, T=_T)
     isa(d, T) && return f(d)
     vmap(d) do v

@@ -43,7 +43,7 @@ end
 
 _alt(x::Symbol) = string(x)
 _alt(x::String) = Symbol(x)
-function (d::Map)(k::Text, v=null)
+function (d::Map)(k::Str, v=null)
     r = getindexr(d, k)
     r != null && return r
     r = getindexr(d, _alt(k))

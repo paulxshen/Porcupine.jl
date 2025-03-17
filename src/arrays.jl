@@ -28,10 +28,10 @@ Base.diff(x::Number; kw...) = 0
 (x::Scalar)(args...) = x
 (a::AbstractArray)(args::Vararg{<:Index}) = a[args...]
 (a::AbstractArray)(args...) = getindexf(a, args...)
-(a::AbstractArray)(::Text) = a
+(a::AbstractArray)(::Str) = a
 
 (t::Tuple)(args::Vararg{<:Index}) = t[args...]
-(t::Tuple)(::Text) = t
+(t::Tuple)(::Str) = t
 Base.Array(x) = x
 
 function imnormal(a)

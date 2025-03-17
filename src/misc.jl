@@ -5,7 +5,7 @@ Base.sort(x) = sort(collect(x))
 pairs(x) = [k => x[k] for k in keys(x)]
 ° = π / 180
 
-Base.getindex(x::Number, k::Text) = x
+Base.getindex(x::Number, k::Str) = x
 gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)
 dropitr(x) = first(x) == last(x) ? first(x) : x
 function adddims(a; dims)
@@ -89,7 +89,7 @@ function timepassed()
     end
 end
 
-AUTODIFF() = !haskey(ENV, "autodiff") || ENV["autodiff"] == "1"
+AUTODIFF() = haskey(ENV, "AUTODIFF") && ENV["AUTODIFF"] == "1"
 
 
 BREAK = "----------------------------------------"

@@ -31,7 +31,7 @@ function ChainRulesCore.rrule(::typeof(namedtuple), ps)
     return y, NamedTuple_pullback
 end
 
-function ChainRulesCore.rrule(::Type{Pair}, a::Symbol, b)
+function ChainRulesCore.rrule(::Type{Pair}, a::Str, b)
     y = Pair(a, b)
     function Pair_pullback(ȳ)
         NoTangent(), NoTangent(), ȳ[2]
