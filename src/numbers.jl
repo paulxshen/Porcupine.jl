@@ -1,5 +1,6 @@
 round(x) = Base.round.(Int, x)
 round(T, x) = Base.round.(T, x)
+round(a...; kw...) = Base.round(a...; kw...)
 
 function int(x::Real, tol=0.01)
     i = round(Int, x)
@@ -15,3 +16,4 @@ int(x) = fmap(int, x)
 signedfloor(x) = x > 0 ? floor(Int, x) : ceil(Int, x)
 signedceil(x) = x > 0 ? ceil(Int, x) : floor(Int, x)
 
+Base.abs(a) = abs.(a)

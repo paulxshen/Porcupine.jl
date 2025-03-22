@@ -94,5 +94,5 @@ AUTODIFF() = haskey(ENV, "AUTODIFF") && ENV["AUTODIFF"] == "1"
 
 BREAK = "----------------------------------------"
 DBREAK = "========================================"
-disp(x::Number) = format(x; commas=true, precision=3)
+disp(x::Number) = format(x; commas=true, precision=2)
 disp(x) = x
