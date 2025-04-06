@@ -1,13 +1,8 @@
 nn(I::AbstractVector{<:Integer}) = [(I, 1)]
 nn(I::NTuple{N,<:Integer}) where {N} = [(I, 1)]
 function nn(i)
-    p = ignore_derivatives() do
-        floor.(Int, i)
-    end
-    q = ignore_derivatives() do
-        ceil.(Int, i)
-    end
-    # p == q && return ([p], [1])
+    p = floor.(Int, i)
+    q = ceil.(Int, i)
 
     [(j, prod(1 - abs.(i - j))) for j = @ignore_derivatives Base.product(unique.(zip(p, q))...)]
 end

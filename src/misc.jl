@@ -95,4 +95,8 @@ AUTODIFF() = haskey(ENV, "AUTODIFF") && ENV["AUTODIFF"] == "1"
 BREAK = "----------------------------------------"
 DBREAK = "========================================"
 disp(x::Number) = format(x; commas=true, precision=2)
+function disp(d::Map)
+    s = JSON.json(d, 4)
+    replace(s, "{" => "", "}\n" => "")
+end
 disp(x) = x
