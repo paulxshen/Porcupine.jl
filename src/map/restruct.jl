@@ -8,8 +8,8 @@ function kvmap(f::Func, x::AbstractDict)
     dict([f(k, x[k]) for k = keys(x)])
     # dict([f(k, v) for (k, v) = pairs(x)])
 end
-vmap(f::Func, x::NamedTuple) = kvmap((k, v) -> k => f(v), x)
-vmap(f::Func, x::AbstractDict) = kvmap((k, v) -> k => f(v), x)
+vmap(f, x) = kvmap((k, v) -> k => f(v), x)
+kmap(f, x) = kvmap((k, v) -> f(k) => v, x)
 
 # broadcast(::typeof(+), args...) = Base.broadcast(+, filter(!isempty, args)...)
 # broadcast(args...) = Base.broadcast(args...)
