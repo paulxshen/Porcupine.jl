@@ -10,7 +10,7 @@ export int, signedfloor, signedceil
 export upsample, downsample, downsample_by_range, _downvec
 export divΔ, centroids, centroidvals
 export symmetric
-export ⊙, ⊘
+export ⊙, ⊘, Del, cdiff
 export @nograd, @convert
 export invperm, permutedims, adddims
 export cpu, gpu

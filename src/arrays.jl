@@ -7,6 +7,8 @@ function int(x::AbstractRange)
 end
 
 
+Base.min(a::AbstractArray, b::AbstractArray) = min.(a, b)
+Base.max(a::AbstractArray, b::AbstractArray) = max.(a, b)
 
 getindexs(s::Number, i) = s * i
 getindexs(s::AbstractVector, i) = i == 0 ? 0 : getindexf(s, i)
@@ -23,7 +25,6 @@ function crop(a, l, r=l)
 end
 crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 
-Base.diff(x::Number; kw...) = 0
 
 (x::Scalar)(args...) = x
 (a::AbstractArray)(args::Vararg{<:Index}) = a[args...]
@@ -41,11 +42,7 @@ function imnormal(a)
     end
 
     Z = norm(n)
-    if Z > 1.0f-4
-        n /= Z
-    else
-        n *= 0
-    end
+    Z > 0 && return n / Z
     n
 end
 # sz = size(d)

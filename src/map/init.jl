@@ -22,6 +22,7 @@ end
 
 
 namedtuple(x) = NamedTuple(x)
+namedtuple(d::AbstractDict) = NamedTuple(Pair.(Symbol.(keys(d)), values(d)))
 function ChainRulesCore.rrule(::typeof(namedtuple), ps)
     # @show ps
     y = namedtuple(ps)

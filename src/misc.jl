@@ -6,7 +6,7 @@ pairs(x) = [k => x[k] for k in keys(x)]
 ° = π / 180
 
 Base.getindex(x::Number, k::Str) = x
-gaussian(x; μ=0, σ=1) = exp(-((x - μ) / σ)^2)
+gaussian(x) = exp(-x^2 / 2)
 dropitr(x) = first(x) == last(x) ? first(x) : x
 function adddims(a; dims)
     sz = ignore_derivatives() do
@@ -24,19 +24,16 @@ function adddims(a; dims)
 end
 
 
+Base.reverse(x::Number; kw...) = x
 
 # Base.convert(T, x) = convert.(T, x)
 
 # Base.Float64(x::List) = f64(x)
 trim(x, dx) = round.(x / dx) * dx
-using ChainRulesCore
-macro nograd(ex)
-    quote
-        $(esc(ex)) = ignore_derivatives() do
-            $(esc(ex))
-        end
-    end
-end
+round1(x) = round(x, digits=1)
+round2(x) = round(x, digits=2)
+round3(x) = round(x, digits=3)
+round4(x) = round(x, digits=4)
 
 macro convert(T, ex)
     quote
