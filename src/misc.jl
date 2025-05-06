@@ -34,6 +34,8 @@ round1(x) = round(x, digits=1)
 round2(x) = round(x, digits=2)
 round3(x) = round(x, digits=3)
 round4(x) = round(x, digits=4)
+round5(x) = round(x, digits=5)
+round6(x) = round(x, digits=6)
 
 macro convert(T, ex)
     quote

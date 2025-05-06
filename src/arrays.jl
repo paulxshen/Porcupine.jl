@@ -45,6 +45,13 @@ function imnormal(a)
     Z > 0 && return n / Z
     n
 end
+function improj(a)
+    N = ndims(a)
+    g = centroids.(diff.([a], 1:N), [[j for j = 1:N if j != i] for i = 1:N])
+    P = sum.(g * permutedims(g, (2, 1)))
+    tr(P) > 0 && return P / tr(P)
+    P
+end
 # sz = size(d)
 # dmin, dmax = extrema(d)
 # if !(dmin + TOL < 0 < dmax - TOL)

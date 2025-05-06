@@ -42,7 +42,7 @@ function (d::Map)(k::Int)
 end
 
 _alt(x::Symbol) = string(x)
-_alt(x::String) = Symbol(x)
+_alt(x::AbstractString) = Symbol(x)
 function (d::Map)(k::Str, v=null)
     r = getindexr(d, k)
     r != null && return r
