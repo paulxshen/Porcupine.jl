@@ -1,8 +1,8 @@
 nn(I::AbstractVector{<:Integer}) = [(I, 1)]
 nn(I::NTuple{N,<:Integer}) where {N} = [(I, 1)]
 function nn(i; approx=false)
-    p = floor.(Int, i)
-    q = ceil.(Int, i)
+    p = @ignore_derivatives floor.(Int, i)
+    q = @ignore_derivatives ceil.(Int, i)
 
     if approx
         all(p .== q) && return [(p, 1)]
