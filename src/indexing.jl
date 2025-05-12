@@ -1,9 +1,15 @@
 nn(I::AbstractVector{<:Integer}) = [(I, 1)]
 nn(I::NTuple{N,<:Integer}) where {N} = [(I, 1)]
-function nn(i)
+function nn(i; approx=false)
     p = floor.(Int, i)
     q = ceil.(Int, i)
 
+    if approx
+        all(p .== q) && return [(p, 1)]
+        a = norm(i - p)
+        b = norm(i - q)
+        return [(p, b / (a + b)), (q, a / (a + b))]
+    end
     [(j, prod(1 - abs.(i - j))) for j = @ignore_derivatives Base.product(unique.(zip(p, q))...)]
 end
 
@@ -29,9 +35,9 @@ function getindexf(a, I::Tuple)
     getindexf(a, I...)
 end
 
-function getindexf(a, I...)
+function getindexf(a, I...; approx=false)
     start = first.(I)
-    startws = nn(start)
+    startws = nn(start; approx)
 
     sum(startws) do (s, w)
         w * a[int.(s - start .+ I)...]

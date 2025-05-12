@@ -1,7 +1,3 @@
-round(x) = Base.round.(Int, x)
-round(T, x) = Base.round.(T, x)
-round(a...; kw...) = Base.round(a...; kw...)
-
 function int(x::Real, tol=0.01)
     i = round(Int, x)
     d = abs(x - i)
