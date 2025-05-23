@@ -35,9 +35,9 @@ crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 (t::Tuple)(::Str) = t
 Base.Array(x) = x
 
-function imnormal(a)
-    N = ndims(a)
+function imnormal(a::AbstractArray{T,N}) where {T,N}
     n = map(1:N) do dims
+        size(a, dims) == 1 && return 0
         -sum(diff(a; dims))
     end
 

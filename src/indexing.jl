@@ -36,11 +36,14 @@ function getindexf(a, I::Tuple)
 end
 
 function getindexf(a, I...; approx=false)
+    # I = @ignore_derivatives I
     start = first.(I)
     startws = nn(start; approx)
 
     sum(startws) do (s, w)
-        w * a[int.(s - start .+ I)...]
+        v = int.(s - start .+ I)
+        # w = @ignore_derivatives w
+        w * a[v...]
     end
 end
 

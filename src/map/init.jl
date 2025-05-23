@@ -3,23 +3,27 @@ Base.map(f::Func, s::AbstractSet) = [f(x) for x = s]
 # namedtuple(d::AbstractDict) = NamedTuple(Pair.(Symbol.(keys(d)), values(d)))
 # namedtuple(ps::AbstractVector{<:Pair}) = NamedTuple([Symbol(p[1]) => p[2] for p in ps])
 
-dict() = OrderedDict()
-function dict(K, V, kvs)
-    r = OrderedDict{K,V}()
+function dict(kvs)
+    r = OrderedDict()
     for (k, v) = kvs
         r[k] = v
     end
     r
 end
-function dict(ps::Vector{<:Pair{K,V}}) where {K,V}
-    dict(K, V, ps)
-end
-dict(x::NamedTuple) = dict(pairs(x))
-function dict(ps)
-    dict(Any, Any, ps)
-end
-
-
+# function dict(ps::Vector{<:Pair{K,V}}) where {K,V}
+#     dict(K, V, ps)
+# end
+# dict(x::NamedTuple) = dict(pairs(x))
+# function dict(kvs)
+#     OrderedDict(kvs)
+# end
+# function ChainRulesCore.rrule(::typeof(dict), ps)
+#     y = dict(ps)
+#     function NamedTuple_pullback(ȳ)
+#         NoTangent(), collect(pairs(ȳ))
+#     end
+#     return y, NamedTuple_pullback
+# end
 
 namedtuple(x) = NamedTuple(x)
 namedtuple(d::AbstractDict) = NamedTuple(Pair.(Symbol.(keys(d)), values(d)))

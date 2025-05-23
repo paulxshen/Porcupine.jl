@@ -15,42 +15,13 @@ cdiff(x::Number, args...; kw...) = 0
 Base.diff(a, i) = diff(a, dims=i)
 cdiff(a, i) = cdiff(a; dims=i)
 
-function diffpad(a, vl, vr=vl; dims=1, diff=diff, autodiff=true)
+function diffpad(a::AbstractArray{T,N}, v, dims=1; diff=diff) where {T,N}
     # @assert all(!isnan, a)
-
-    sel = 1:ndims(a) .== dims
+    vl, vr = v
+    s = 1:N .== dims
     l = !isnothing(vl)
     r = !isnothing(vr)
-    # @time b[range.(l * sel + 1, sz - r * sel)...] = diff(a; dims)
-    # @time pad!(b, vl, l * sel, 0)
-    # @time pad!(b, vr, 0, r * sel)
-    # println()
-
-    if autodiff
-        vl ∈ (0, nothing) && @nograd vl
-        vr ∈ (0, nothing) && @nograd vr
-        b = diff(a; dims)
-        b = pad(b, vl, vr, l * sel, r * sel)
-    else
-        sz = Tuple(size(a) + (l + r - 1) * sel)
-        b = similar(a, sz)
-        b[range.(l * sel + 1, sz - r * sel)...] = diff(a; dims)
-        pad!(b, vl, vr, l * sel, r * sel)
-        # @time b[range.(l * sel + 1, sz - r * sel)...] = diff(a; dims)
-        # @time pad!(b, vl, vr, l * sel, r * sel)
-        # println()
-    end
-    @assert typeof(b) == typeof(a)
-    b
-    # if autodiff
-    #     copy(b)
-    # else
-    #     b
-    # end
-    # else
-    # a = diff(a; dims)
-    # a = pad(a, vl, l * sel, 0)
-    # a = pad(a, vr, 0, r * sel)
+    diff(pad(a, vl, vr, l * s, r * s); dims)
 end
 
 struct Del
@@ -62,53 +33,52 @@ struct Del
     end
 end
 
-function LinearAlgebra.cross(m::Del, d::Map)
+function LinearAlgebra.cross(m::Del, as::Map)
     @unpack diff, deltas, padvals = m
-    ks = keys(d)
-    N = ndims(d(1))
+    ks = keys(as)
+    N = ndims(as(1))
     Δs = map(1:N) do i
         getindex.(deltas.(ks), i)
     end
-    ps = map(1:N) do i
+    pads = map(1:N) do i
         getindex.(padvals.(ks), i, :)
     end
-    as = values(d)
-    delcross(diff, Δs, ps, as)
+    as = values(as)
+    delcross(diff, Δs, pads, as)
 end
 
 function LinearAlgebra.cross(m::Del, v)
     @unpack diff, deltas, padvals = m
     Δs = values.(deltas)
-    ps = values.(padvals)
-    delcross(diff, Δs, ps, v)
+    pads = values.(padvals)
+    delcross(diff, Δs, pads, v)
 end
 
-function delcross(diff, Δs, ps, as)
-    autodiff = AUTODIFF()
-    @nograd Δs
-
-    _diffpad(a, p, dims) = diffpad(a, p...; dims, diff, autodiff)
+function delcross(diff, Δs, pads, as)
+    # diffpad(a, p, dims) = diffpad(a, p...; dims, diff)
     N = ndims(as(1))
     if N == 2
-        dx, dy = [Δs(i) for i = 1:2]
+        dx, dy = Δs.(1:2)
+        px, py = pads.(1:2)
         if length(as) == 1
             u, = as
-            return [_diffpad(u, ps(2)(1), 2) ./ dy(1), -_diffpad(u, ps(1)(1), 1) ./ dx(1)]
+            return [diffpad(u, py(1), 2) ./ dy(1), -diffpad(u, px(1), 1) ./ dx(1)]
         elseif length(as) == 2
             u, v = as
-            return [_diffpad(v, ps(1)(2), 1) ./ dx(2) - _diffpad(u, ps(2)(1), 2) ./ dy(1)]
+            return [diffpad(v, px(2), 1) ./ dx(2) - diffpad(u, py(1), 2) ./ dy(1)]
         else
             error()
         end
     elseif N == 3
         dx, dy, dz = Δs.(1:3)
+        px, py, pz = pads.(1:3)
         u, v, w = as
-        uy = _diffpad(u, ps(2)(1), 2) ./ dy(1)
-        uz = _diffpad(u, ps(3)(1), 3) ./ dz(1)
-        vx = _diffpad(v, ps(1)(2), 1) ./ dx(2)
-        vz = _diffpad(v, ps(3)(2), 3) ./ dz(2)
-        wx = _diffpad(w, ps(1)(3), 1) ./ dx(3)
-        wy = _diffpad(w, ps(2)(3), 2) ./ dy(3)
+        uy = diffpad(u, py(1), 2) ./ dy(1)
+        uz = diffpad(u, pz(1), 3) ./ dz(1)
+        vx = diffpad(v, px(2), 1) ./ dx(2)
+        vz = diffpad(v, pz(2), 3) ./ dz(2)
+        wx = diffpad(w, px(3), 1) ./ dx(3)
+        wy = diffpad(w, py(3), 2) ./ dy(3)
         return [wy - vz, uz - wx, vx - uy]
     end
     error()
