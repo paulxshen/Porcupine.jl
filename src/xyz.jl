@@ -3,7 +3,8 @@ function packxyz(d)
     N = ndims(d(1))
     ks = @ignore_derivatives sort(unique(first.(string.(keys(d)))))
     namedtuple(Symbol.(ks) .=> map(ks) do k
-        map(k .* xyz[1:N]) do k
+        a = @ignore_derivatives k .* xyz[1:N]
+        map(a) do k
             d(k, 0)
         end
     end)

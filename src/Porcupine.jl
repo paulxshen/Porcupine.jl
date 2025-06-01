@@ -17,7 +17,7 @@ export cpu, gpu
 export gc, timepassed, AUTODIFF
 export constructor
 export packxyz, unpackxyz
-export imnormal, improj, getbbox
+export imnormal, improj, getbbox, resize
 export togreek, fromgreek
 export round1, round2, round3, round4, round5, round6
 export disp, BREAK, DBREAK

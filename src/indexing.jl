@@ -12,6 +12,11 @@ function nn(i; approx=false)
     end
     [(j, prod(1 - abs.(i - j))) for j = @ignore_derivatives Base.product(unique.(zip(p, q))...)]
 end
+function nn(i::Number; kw...)
+    map(nn((i,); kw...)) do (s, w)
+        s[1], w
+    end
+end
 
 _size(::Scalar) = 1
 _size(a) = size(a)

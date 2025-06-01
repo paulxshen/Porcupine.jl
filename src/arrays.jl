@@ -96,3 +96,29 @@ end
 
 I2 = Matrix(I, 2, 2)
 I3 = Matrix(I, 3, 3)
+
+function resize(a::AbstractArray{T,N}, sz) where {T,N}
+    if T <: Integer
+        F = Float32
+    else
+        F = T
+    end
+    for (dims, (_n, n)) = enumerate(zip(size(a), sz))
+        if _n != n
+            s = eachslice(a; dims)
+            v = map(1:n) do i
+                v = @ignore_derivatives nn((i - F(0.5)) * _n / n + F(0.5))
+                sum(v) do (j, w)
+                    j = max(1, j)
+                    j = min(j, _n)
+                    # w * selectdim(a, dims, j)
+                    w * s[j]
+                end
+            end
+            p = collect(1:N-1)
+            @ignore_derivatives insert!(p, dims, N)
+            a = permutedims(stack(v), p)
+        end
+    end
+    a
+end
