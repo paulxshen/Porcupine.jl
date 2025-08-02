@@ -41,17 +41,17 @@ function getindexf(a, I::Tuple)
 end
 
 function getindexf(a, I...; approx=false)
-    # I = @ignore_derivatives I
+    I = map(enumerate(I)) do (i, v)
+        v === (:) ? (1:size(a, i)) : v
+    end
     start = first.(I)
     startws = nn(start; approx)
 
     sum(startws) do (s, w)
         v = int.(s - start .+ I)
-        # w = @ignore_derivatives w
         w * a[v...]
     end
 end
-
 
 function indexof(v, x::Real)
     v[1] > v[end] && return -indexof(reverse(v), x)

@@ -24,3 +24,5 @@ Base.:*(x::Nothing, y) = nothing
 Base.:*(x::Nothing, y::Nothing) = nothing
 
 Base.zero(x) = 0
+
+Base.:+(x::Nothing, y::ChainRulesCore.ZeroTangent) = x
