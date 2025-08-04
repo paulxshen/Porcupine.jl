@@ -56,7 +56,7 @@ function getindexf(a, I...)
         end
     end
     all(isnum, I) && return sum(a)
-    dims = findall(isnum, I)
+    dims = Tuple(findall(isnum, I))
     !isempty(dims) && return dropdims(a; dims)
     a
     # if q > p
