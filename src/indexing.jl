@@ -35,24 +35,27 @@ function place!(a, v, start; additive=true)
     end
     a
 end
+AD() = haskey(ENV, "AD") && ENV["AD"] == "1"
 
 function getindexf(a, I::Tuple)
     getindexf(a, I...)
 end
 isnum(::Number) = true
 isnum(a...) = false
-function getindexf(a, I...)
+function getindexf(a::AbstractArray{T,N}, I...) where {T,N}
     I = map(enumerate(I)) do (i, v)
         v === (:) ? (1:size(a, i)) : v
     end
-    s = first.(I)
+    s = T.(first.(I))
     l = length.(I)
-    p = max.(floor.(Int, s), 1)
-    q = min.(ceil.(Int, s), size(a))
+    p = @ignore_derivatives max.(floor.(Int, s), 1)
+    q = @ignore_derivatives min.(ceil.(Int, s), size(a))
     a = a[(:).(p, q + l - 1)...]
     for (d, (s, p, q, l)) = enumerate(zip(s, p, q, l))
         if q > p
-            a = (q - s) * selectdim(a, d, 1:l) + (s - p) * selectdim(a, d, 2:l+1)
+            h = d .== 1:N
+            a = (q - s) * a[ifelse.(h, (1:l,), (:,))...] + (s - p) * a[ifelse.(h, (2:l+1,), (:,))...]
+            # a = (q - s) * selectdim(a, d, 1:l) + (s - p) * selectdim(a, d, 2:l+1)
         end
     end
     all(isnum, I) && return sum(a)

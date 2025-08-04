@@ -11,7 +11,7 @@ export upsample, downsample, downsample_by_range, _downvec
 export divΔ, centroids, centroidvals
 export symmetric
 export ⊙, ⊘, Del, cdiff
-export @nograd, @convert
+export @nograd, @convert, AD
 export invperm, permutedims, adddims
 export cpu, gpu
 export gc, timepassed, AUTODIFF
