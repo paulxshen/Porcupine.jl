@@ -39,18 +39,32 @@ end
 function getindexf(a, I::Tuple)
     getindexf(a, I...)
 end
-
-function getindexf(a, I...; approx=false)
+isnum(::Number) = true
+isnum(a...) = false
+function getindexf(a, I...)
     I = map(enumerate(I)) do (i, v)
         v === (:) ? (1:size(a, i)) : v
     end
-    start = first.(I)
-    startws = nn(start; approx)
-
-    sum(startws) do (s, w)
-        v = int.(s - start .+ I)
-        w * a[v...]
+    s = first.(I)
+    l = length.(I)
+    p = max.(floor.(Int, s), 1)
+    q = min.(ceil.(Int, s), size(a))
+    a = a[(:).(p, q + l - 1)...]
+    for (d, (s, p, q, l)) = enumerate(zip(s, p, q, l))
+        if q > p
+            a = (q - s) * selectdim(a, d, 1:l) + (s - p) * selectdim(a, d, 2:l+1)
+        end
     end
+    all(isnum, I) && return sum(a)
+    dims = findall(isnum, I)
+    !isempty(dims) && return dropdims(a; dims)
+    a
+    # if q > p
+    #     a = (q - s) * selectdim(a, dims - o, int(r + p - s)) + (s - p) * selectdim(a, dims - o, int(r + q - s))
+    # elseif isa(r, Real)
+    #     a = dropdims(a; dims)
+    # end
+    # o += isa(r, Real)
 end
 
 function indexof(v, x::Real)
