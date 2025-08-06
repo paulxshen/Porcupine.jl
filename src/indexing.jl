@@ -42,6 +42,18 @@ function getindexf(a, I::Tuple)
 end
 isnum(::Number) = true
 isnum(a...) = false
+function getindexf(a::AbstractArray{T,N}, I::Vararg{Real,M}) where {T,N,M}
+    p = @ignore_derivatives max.(floor.(Int, I), 1)
+    q = @ignore_derivatives min.(ceil.(Int, I), size(a))
+    a = a[(:).(p, q)...]
+    for (d, (s, p, q)) = enumerate(zip(I, p, q))
+        if q > p
+            h = d .== 1:N
+            a = (q - s) * a[ifelse.(h, (1:1,), (:,))...] + (s - p) * a[ifelse.(h, (2:2,), (:,))...]
+        end
+    end
+    sum(a)
+end
 function getindexf(a::AbstractArray{T,N}, I...) where {T,N}
     I = map(enumerate(I)) do (i, v)
         v === (:) ? (1:size(a, i)) : v
@@ -58,7 +70,6 @@ function getindexf(a::AbstractArray{T,N}, I...) where {T,N}
             # a = (q - s) * selectdim(a, d, 1:l) + (s - p) * selectdim(a, d, 2:l+1)
         end
     end
-    all(isnum, I) && return sum(a)
     dims = Tuple(findall(isnum, I))
     !isempty(dims) && return dropdims(a; dims)
     a
