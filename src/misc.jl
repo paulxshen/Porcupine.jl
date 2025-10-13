@@ -36,7 +36,6 @@ round3(x) = round(x, digits=3)
 round4(x) = round(x, digits=4)
 round5(x) = round(x, digits=5)
 round6(x) = round(x, digits=6)
-
 macro convert(T, ex)
     quote
         $(esc(ex)) = fmap($(esc(ex))) do x
@@ -45,33 +44,19 @@ macro convert(T, ex)
     end
 end
 
-function gc(ratio=4.0; show=false)
-    ignore_derivatives() do
-        t = time()
-        if !haskey(ENV, "gc")
-            ENV["gc"] = "0,0,0,0"
-        end
-        # for (k, full) = zip(("gctimefull", "gctime"), (true, false))
-        Tf, T, df, d = parse.(Float64, split(ENV["gc"], ","))
-        if t > Tf
-            GC.gc(true)
-            t0 = t
-            t = time()
-            # show && println("""GC took $(t - t0) seconds""")
-            df = (t - t0) * ratio
-            Tf = t + df
-            T = t + d
-        elseif t > T
-            GC.gc(false)
-            t0 = t
-            t = time()
-            d = (t - t0) * ratio
-            T = t + d
-            Tf = max(Tf, T)
-        else
-            return
-        end
-        ENV["gc"] = "$(Tf),$(T),$(df),$(d)"
+getproperty(x::Map, k::Symbol) = x(k)
+function getproperty(m::T, k::Symbol) where T
+    hasfield(T, k) && return getfield(m, k)
+    fieldcount(T) == 0 && return null
+    for f = fieldnames(T)
+        v = getproperty(getfield(m, f), k)
+        v != null && return v
+    end
+    null
+end
+macro getr(ex)
+    quote
+        Base.getproperty(m::$(esc(ex)), k::Symbol) = getproperty(m, k)
     end
 end
 

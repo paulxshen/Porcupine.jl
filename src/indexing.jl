@@ -37,12 +37,13 @@ function place!(a, v, start; additive=true)
 end
 AD() = haskey(ENV, "AD") && ENV["AD"] == "1"
 
-function getindexf(a, I::Tuple)
-    getindexf(a, I...)
-end
 isnum(::Number) = true
 isnum(a...) = false
-function getindexf(a::AbstractArray{T,N}, I::Vararg{Real,M}) where {T,N,M}
+
+# getindexf(a, I::Tuple)=    getindexf(a, I...)
+getindexf(a, I::Vararg{Integer,N}) where {N} = a[I...]
+function getindexf(a::AbstractArray{T,N}, I::Vararg{Real}) where {T,N}
+    I = T.(I)
     p = @ignore_derivatives max.(floor.(Int, I), 1)
     q = @ignore_derivatives min.(ceil.(Int, I), size(a))
     a = a[(:).(p, q)...]

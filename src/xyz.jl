@@ -1,5 +1,5 @@
 xyz = ["x", "y", "z"]
-function unpackxyz(d)
+function todvoa(d)
     N = ndims(d(1))
     ks = @ignore_derivatives sort(unique(first.(string.(keys(d)))))
     namedtuple(Symbol.(ks) .=> map(ks) do k
@@ -10,7 +10,7 @@ function unpackxyz(d)
     end)
 end
 
-function packxyz(d)
+function todxyz(d)
     namedtuple(reduce(vcat, map(pairs(d)) do (k, v)
         N = length(v)
         Symbol.(string(k) .* xyz[1:N]) .=> v

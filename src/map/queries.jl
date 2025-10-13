@@ -1,4 +1,4 @@
-Base.haskey(a::NamedTuple, k::String) = false
+Base.haskey(a::NamedTuple, k::AbstractString) = false
 
 struct Null end
 null = Null()
@@ -48,8 +48,7 @@ function (d::Map)(k::Str, v=null)
     r != null && return r
     r = getindexr(d, _alt(k))
     r != null && return r
-    v != null && return v
-    error("$k not found, even recursively")
+    v
 end
 
 function (d::Map)(k::Real)

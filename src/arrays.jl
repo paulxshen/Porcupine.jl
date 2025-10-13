@@ -28,6 +28,7 @@ crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 
 (x::Scalar)(args...) = x
 (a::AbstractArray)(args::Vararg{<:Index}) = a[args...]
+(a::AbstractArray)(I::AbstractVector{<:Integer}) = a[I]
 (a::AbstractArray)(args...) = getindexf(a, args...)
 (a::AbstractArray)(::Str) = a
 
@@ -97,7 +98,7 @@ end
 I2 = Matrix(I, 2, 2)
 I3 = Matrix(I, 3, 3)
 
-function resize(a::AbstractArray{T,N}, sz) where {T,N}
+function resize(a::AbstractArray{T,N}, sz::Union{AbstractArray{<:Integer},NTuple{N,<:Integer}}) where {T,N}
     if T <: Integer
         F = Float32
     else
@@ -122,3 +123,25 @@ function resize(a::AbstractArray{T,N}, sz) where {T,N}
     end
     a
 end
+
+function resize(a::AbstractArray{T,N}, axs) where {T,N}
+    for (i, ax) = zip(1:N, axs)
+        I = ifelse.(i .== (1:N), (ax,), (:))
+        a = getindexf.((a,), I...)
+        a = permutedims(stack(a), ignore_derivatives() do
+            insert!(collect(1:N-1), i, N)
+        end)
+    end
+    a
+end
+
+unstack(a::AbstractArray{T,N}) where {T,N} = eachslice(a, dims=N)
+
+function smooth(a::AbstractArray{T,N}) where {T,N}
+    for dims = 1:N
+        n = size(a, dims)
+        a = (selectdim(a, dims, 1:n-1) + selectdim(a, dims, 2:n)) / 2
+    end
+    a
+end
+Base.step(v::AbstractVector) = v[2] - v[1]
