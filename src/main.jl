@@ -1,4 +1,4 @@
-using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, ChainRulesCore, ArrayPadding, Format, JSON, BFloat16s, GPUArraysCore, StaticArrays
+using DataStructures, LinearAlgebra, Statistics, UnPack, Functors, ChainRulesCore, ArrayPadding, Format, JSON, GPUArraysCore, StaticArrays
 using Functors: functor
 using ArrayPadding: constructor
 

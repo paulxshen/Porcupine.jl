@@ -44,8 +44,8 @@ macro convert(T, ex)
     end
 end
 
-getproperty(x::Map, k::Symbol) = x(k)
-function getproperty(m::T, k::Symbol) where T
+# getproperty(x::Map, k::Symbol) = x(k)
+function _getproperty(m::T, k::Symbol) where T
     hasfield(T, k) && return getfield(m, k)
     fieldcount(T) == 0 && return null
     for f = fieldnames(T)
@@ -56,7 +56,7 @@ function getproperty(m::T, k::Symbol) where T
 end
 macro getr(ex)
     quote
-        Base.getproperty(m::$(esc(ex)), k::Symbol) = getproperty(m, k)
+        Base.getproperty(m::$(esc(ex)), k::Symbol) = _getproperty(m, k)
     end
 end
 

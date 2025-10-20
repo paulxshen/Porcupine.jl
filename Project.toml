@@ -1,11 +1,10 @@
 name = "Porcupine"
 uuid = "3b53a3d7-3f34-4bba-8df2-4717a8b1e972"
 authors = ["Paul Shen <pxshen@alumni.stanford.edu>"]
-version = "1.0.33"
+version = "1.0.34"
 
 [deps]
 ArrayPadding = "fe5ef43c-4912-423d-9170-4bd5cb6a013a"
-BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Format = "1fa38f19-a742-5d3f-a2b9-30dd87b9d5f8"
@@ -27,7 +26,6 @@ ZygoteExt = "Zygote"
 
 [compat]
 ArrayPadding = "1"
-BFloat16s = "0.5,0.6,0.7,0.8,0.9,1"
 CUDA = "5,6,7,8"
 ChainRulesCore = "1"
 DataStructures = "0.18,0.19,0.20,1"

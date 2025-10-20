@@ -12,7 +12,7 @@ export divΔ, centroids, centroidvals
 export symmetric
 export ⊙, ⊘, Del, cdiff
 export @nograd, @convert, AD, unstack
-export invperm, permutedims, adddims
+# export invperm, permutedims, adddims
 export cpu, gpu
 export gc, timepassed, AUTODIFF
 export constructor

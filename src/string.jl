@@ -5,7 +5,6 @@ Base.convert(::Type{Symbol}, x::String) = Symbol(x)
 Base.convert(::Type{String}, x::Symbol) = string(x)
 
 
-
 Base.startswith(s, x) = startswith(string(s), string(x))
 
 function togreek(x::T) where {T}

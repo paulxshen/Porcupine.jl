@@ -1,9 +1,10 @@
-for F in (:(Base.Float16), :(Base.Float32), :(Base.Float64), :BFloat16)
+for F in (:(Base.Float16), :(Base.Float32), :(Base.Float64))
     @eval Base.convert(::Type{$F}, x::Str) = parse($F, string(x))
     @eval $F(x::Str) = parse($F, string(x))
     @eval $F(x::Container) = ($F).(x)
     @eval $F(d::Map) = fmap($F, d)
     @eval $F(x::$F) = x
+    @eval $F(::Nothing) = nothing
 end
 
 

@@ -25,13 +25,13 @@ function getindexr(d::Map, k)
     null
 end
 
-function Base.getproperty(d::AbstractDict, k::Symbol)
-    if hasproperty(d, k)
-        # @warn "returning $(typeof(d)) property $k not key $k"
-        return getfield(d, k)
-    end
-    d(k)
-end
+# function Base.getproperty(d::AbstractDict, k::Symbol)
+#     if hasproperty(d, k)
+#         # @warn "returning $(typeof(d)) property $k not key $k"
+#         return getfield(d, k)
+#     end
+#     d(k)
+# end
 # Base.getproperty(d::NamedTuple, k) = d(k)
 
 function (d::Map)(k::Int)
