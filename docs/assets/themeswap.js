@@ -15,7 +15,7 @@ function set_theme_from_local_storage() {
   // Initialize a few variables for the loop:
   //
   //  - active: will contain the index of the theme that should be active. Note that there
-  //    is no guarantee that localStorage contains sane values. If `active` stays `null`
+  //    is no guarantee that localStorage contains sane _values. If `active` stays `null`
   //    we either could not find the theme or it is the default (primary) theme anyway.
   //    Either way, we then need to stick to the primary theme.
   //

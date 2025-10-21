@@ -1,8 +1,8 @@
 for T = (:Map, :(AbstractVector{<:AbstractArray}))
     @eval Base.:*(A::AbstractMatrix{S}, v::$T) where {S<:Union{Number,AbstractArray}} =
         map(eachrow(A)) do r
-            # sum(r .⊙ values(v))
-            sum(map(r, values(v)) do a, b
+            # sum(r .⊙ _values(v))
+            sum(map(r, _values(v)) do a, b
                 a .* b
             end)
         end
@@ -18,6 +18,6 @@ Base.:*(A::AbstractMatrix{<:AbstractArray}, B::AbstractVector{<:AbstractArray}) 
 # Base.:*(A::Vector, B::Adjoint) = _vm(A, B)
 # Base.:*(A::Vector{<:AbstractArray}, B::Adjoint{<:AbstractArray,<:AbstractVector}) = _vm(A, B)
 
-LinearAlgebra.norm(a::VectorField) = sqrt.(sum(values(a)) do a
+LinearAlgebra.norm(a::VectorField) = sqrt.(sum(_values(a)) do a
     a .⋅ a
 end)

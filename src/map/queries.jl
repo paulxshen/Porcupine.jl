@@ -16,7 +16,7 @@ end
 getindexr(d, k) = null
 function getindexr(d::Map, k)
     haskey(d, k) && return d[k]
-    for v = values(d)
+    for v = _values(d)
         v = getindexr(v, k)
         if v != null
             return v
@@ -37,7 +37,7 @@ end
 function (d::Map)(k::Int)
     haskey(d, k) && return d[k]
     if k > 0
-        return values(d)[k]
+        return _values(d)[k]
     end
 end
 

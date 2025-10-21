@@ -1,4 +1,4 @@
-Base.map(f::Func, x::AbstractDict) = map(f, values(x))
+Base.map(f::Func, x::AbstractDict) = map(f, _values(x))
 
 function kvmap(f::Func, x::NamedTuple)
     # namedtuple([f(k, v) for (k, v) = pairs(x)])
@@ -16,7 +16,7 @@ kmap(f, x) = kvmap((k, v) -> f(k) => v, x)
 function _vmap(f::Func, x, y)
     isempty(x) && return y
     isempty(y) && return x
-    Pair.(keys(x), broadcast(f, values(x), values(y)))
+    Pair.(keys(x), broadcast(f, _values(x), _values(y)))
 end
 vmap(f::Func, x::NamedTuple, y) = namedtuple(_vmap(f, x, y))
 vmap(f::Func, x::AbstractDict, y) = dict(_vmap(f, x, y))
@@ -44,12 +44,12 @@ end
 
 leaves(x) = [x]
 function leaves(d::Union{Map,AbstractVector{<:AbstractArray}})
-    reduce(vcat, leaves.(values(d)))
+    reduce(vcat, leaves.(_values(d)))
 end
 
 flatten(x::Union{Number,String,Symbol}) = [x]
 function flatten(c)
-    reduce(vcat, flatten.(values(c)))
+    reduce(vcat, flatten.(_values(c)))
 end
 
 sortkeys(d::NamedTuple) = namedtuple([k => sortkeys(d[k]) for k in sort(keys(d))])

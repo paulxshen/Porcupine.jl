@@ -72,14 +72,14 @@ function LinearAlgebra.cross(m::Del, d::Map)
     ps = map(1:N) do i
         getindex.(padvals.(ks), i, :)
     end
-    as = values(d)
+    as = _values(d)
     delcross(diff, Δs, ps, as)
 end
 
 function LinearAlgebra.cross(m::Del, v)
     @unpack diff, deltas, padvals = m
-    Δs = values.(deltas)
-    ps = values.(padvals)
+    Δs = _values.(deltas)
+    ps = _values.(padvals)
     delcross(diff, Δs, ps, v)
 end
 

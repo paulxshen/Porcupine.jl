@@ -30,7 +30,7 @@ end
 
 function LinearAlgebra.cross(m::Del, v)
     @unpack diff, deltas, lpads, upads = m
-    delcross(diff, deltas, lpads, upads, values(v))
+    delcross(diff, deltas, lpads, upads, _values(v))
 end
 
 function delcross(diff, deltas, lpads, upads, as)
