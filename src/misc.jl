@@ -38,7 +38,7 @@ round5(x) = round(x, digits=5)
 round6(x) = round(x, digits=6)
 macro convert(T, ex)
     quote
-        $(esc(ex)) = fmap($(esc(ex))) do x
+        $(esc(ex)) = rmap($(esc(ex))) do x
             convert.($(esc(T)), x)
         end
     end

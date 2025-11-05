@@ -1,5 +1,4 @@
-T = AbstractArray{<:Number}
-gpu(cu, d) = fmap(cu, d, T)
+gpu(cu, d) = fmap(cu, d)
 # gpu(d) = gpu(gpu_device(), d)
-cpu(d) = fmap(Array, d, T)
+cpu(d) = fmap(Array, d)
 

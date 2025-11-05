@@ -1,8 +1,8 @@
-Scalar = Union{Number,Nothing}
+Scalar = Union{Number,Nothing,Missing,AbstractString,Symbol}
 List = Union{AbstractVector,AbstractSet,Tuple}
-Container = Union{List,AbstractArray}
+ArrayLike = Union{List,AbstractArray}
 Map = Union{AbstractDict,NamedTuple}
-Collection = Union{Container,Map}
+Collection = Union{ArrayLike,Map}
 Str = Union{Symbol,AbstractChar,AbstractString}
 Index = Union{S,Colon,UnitRange{T}} where {S<:Integer,T<:Integer}
 Func = Union{Function,Type}

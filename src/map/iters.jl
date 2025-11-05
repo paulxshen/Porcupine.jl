@@ -17,7 +17,16 @@ Base.broadcastable(x::SortedDict) = _values(x)
 Base.broadcastable(x::OrderedDict) = _values(x)
 Base.broadcastable(x::NamedTuple) = collect(x)
 
+rcopy!(x, y) = nothing
 rcopy!(x::AbstractArray{<:Number}, y::AbstractArray{<:Number}) = copy!(x, y)
-rcopy!(x, y) = rcopy!.(_values(x), _values(y))
+rcopy!(x::Collection, y::Collection) = rcopy!.(_values(x), _values(y))
+function rcopy!(a::Map, b::Map)
+    for (k, v) = pairs(a)
+        if v isa Scalar
+        elseif haskey(b, k)
+            rcopy!(v, b[k])
+        end
+    end
+end
 
 Base.getindex(v::Base.ValueIterator, i) = collect(v)[i]

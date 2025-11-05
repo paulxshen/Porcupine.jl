@@ -36,9 +36,7 @@ end
 
 function (d::Map)(k::Int)
     haskey(d, k) && return d[k]
-    if k > 0
-        return _values(d)[k]
-    end
+    _values(d)[k]
 end
 
 _alt(x::Symbol) = string(x)
@@ -65,12 +63,13 @@ end
 
 
 
-function (d::Map)(rx::Regex)
+function _ff(T, d, rx::Regex)
     ks = ignore_derivatives() do
         filter(keys(d)) do k
             match(rx, string(k)) != nothing
         end
     end
-    # println(ks)
-    namedtuple([k => d[k] for k in ks])
+    T([k => d[k] for k in ks])
 end
+(m::NamedTuple)(rx::Regex) = _ff(namedtuple, m, rx)
+(m::AbstractDict)(rx::Regex) = _ff(dict, m, rx)

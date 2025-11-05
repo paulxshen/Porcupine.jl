@@ -7,7 +7,7 @@ end
 int(x::Float16) = int(x, 0.1)
 int(x::Float32) = int(x, 0.01)
 
-int(x) = fmap(int, x)
+int(x) = rmap(int, x)
 
 signedfloor(x) = x > 0 ? floor(Int, x) : ceil(Int, x)
 signedceil(x) = x > 0 ? ceil(Int, x) : floor(Int, x)

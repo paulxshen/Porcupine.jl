@@ -1,10 +1,10 @@
 module Porcupine
 include("main.jl")
-export Map, List, Collection, Container, Str
+export Map, List, Collection, ArrayLike, Str
 export dict, namedtuple, regex
 export getindexr, approx_getindex
 export getindexf, getindexs, place!, crop, indexof
-export trim, fmap, kvmap, kmap, vmap, leaves, flatten, sortkeys
+export trim, rmap, fmap, kvmap, kmap, vmap, leaves, flatten, sortkeys
 export °, gaussian, dropitr, adddims
 export int, signedfloor, signedceil
 export upsample, downsample, downsample_by_range, _downvec

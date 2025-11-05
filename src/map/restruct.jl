@@ -21,33 +21,68 @@ end
 vmap(f::Func, x::NamedTuple, y) = namedtuple(_vmap(f, x, y))
 vmap(f::Func, x::AbstractDict, y) = dict(_vmap(f, x, y))
 
-_T = Union{Number,Str}
-function fmap(f, d::Map, T=_T)
-    isa(d, T) && return f(d)
+# _T = Union{Number,Str}
+# function rmap(f, d::Map, T=_T)
+#     isa(d, T) && return f(d)
+#     vmap(d) do v
+#         rmap(f, v, T)
+#     end
+# end
+# function rmap(f, a::ArrayLike, T=_T)
+#     isa(a, T) && return f(a)
+#     rmap.((f,), a, (T,))
+# end
+# function rmap(f, x, T=_T)
+#     if isa(x, T)
+#         return f(x)
+#     elseif isempty(propertynames(x))
+#         return x
+#     end
+#     xs, re = functor(x)
+#     re(rmap(f, xs, T))
+# end
+fmap(f, x::AbstractArray{<:Number}) = f(x)
+function fmap(f, d::Map)
     vmap(d) do v
-        fmap(f, v, T)
+        fmap(f, v)
     end
 end
-function fmap(f, a::Container, T=_T)
-    isa(a, T) && return f(a)
-    fmap.((f,), a, (T,))
+function fmap(f, a::ArrayLike)
+    fmap.((f,), a)
 end
-function fmap(f, x, T=_T)
-    if isa(x, T)
-        return f(x)
-    elseif isempty(propertynames(x))
+function fmap(f, x)
+    if isempty(propertynames(x))
         return x
     end
     xs, re = functor(x)
-    re(fmap(f, xs, T))
+    re(fmap(f, xs))
 end
+
+rmap(f, x::Scalar) = f(x)
+function rmap(f, d::Map)
+    vmap(d) do v
+        rmap(f, v)
+    end
+end
+function rmap(f, a::ArrayLike)
+    rmap.((f,), a)
+end
+function rmap(f, x)
+    if isempty(propertynames(x))
+        return x
+    end
+    xs, re = functor(x)
+    re(rmap(f, xs))
+end
+
+
 
 leaves(x) = [x]
 function leaves(d::Union{Map,AbstractVector{<:AbstractArray}})
     reduce(vcat, leaves.(_values(d)))
 end
 
-flatten(x::Union{Number,String,Symbol}) = [x]
+flatten(x::Scalar) = [x]
 function flatten(c)
     reduce(vcat, flatten.(_values(c)))
 end
