@@ -18,7 +18,8 @@ Base.:*(A::AbstractMatrix{<:AbstractArray}, B::AbstractVector{<:AbstractArray}) 
 # Base.:*(A::Vector, B::Adjoint) = _vm(A, B)
 # Base.:*(A::Vector{<:AbstractArray}, B::Adjoint{<:AbstractArray,<:AbstractVector}) = _vm(A, B)
 
-norm2(a::VectorField) = [sum(_values(a)) do a
-    a .⋅ a
-end]
-norm(a::VectorField) = [sqrt.(norm2(a)[1])]
+norm2(a::VectorField) =
+    sum(_values(a)) do a
+        a .⋅ a
+    end
+norm(a::VectorField) = sqrt.(norm2(a)[1])
