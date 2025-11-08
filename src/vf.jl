@@ -22,4 +22,4 @@ norm2(a::VectorField) =
     sum(_values(a)) do a
         a .⋅ a
     end
-norm(a::VectorField) = sqrt.(norm2(a)[1])
+norm(a::VectorField) = sqrt.(norm2(a))
