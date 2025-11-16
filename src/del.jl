@@ -35,7 +35,7 @@ end
 
 function delcross(diff, deltas, lpads, upads, as)
     @nograd deltas, lpads, upads
-    N = ndims(as(1))
+    N = ndims(as[1])
     if N == 2
         if length(as) == 1
             u, = as

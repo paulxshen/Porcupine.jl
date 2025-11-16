@@ -36,11 +36,11 @@ crop(a, lr::AbstractMatrix) = crop(a, lr[:, 1], lr[:, 2])
 (t::Tuple)(::Str) = t
 Base.Array(x) = x
 
-function imnormal(a::AbstractArray{T,N}) where {T,N}
+function imnormal(a::AbstractArray{T,N}, d=1) where {T,N}
     n = map(1:N) do dims
         size(a, dims) == 1 && return 0
         -sum(diff(a; dims))
-    end
+    end ./ d
 
     Z = norm(n)
     Z > 0 && return n / Z
@@ -104,6 +104,7 @@ function resize(a::AbstractArray{T,N}, sz::Union{AbstractArray{<:Integer},NTuple
     else
         F = T
     end
+    size(a) == Tuple(sz) && return T.(a)
     for (dims, (_n, n)) = enumerate(zip(size(a), sz))
         if _n != n
             s = eachslice(a; dims)
@@ -124,9 +125,14 @@ function resize(a::AbstractArray{T,N}, sz::Union{AbstractArray{<:Integer},NTuple
     a
 end
 
-function resize(a::AbstractArray{T,N}, axs) where {T,N}
+function resize(a::AbstractArray{T,N}, axs; approx=false) where {T,N}
     for (i, ax) = zip(1:N, axs)
         I = ifelse.(i .== (1:N), (ax,), (:))
+        if approx
+            I = map(I) do I
+                I == (:) ? I : round.(Int, ax)
+            end
+        end
         a = getindexf.((a,), I...)
         a = permutedims(stack(a), ignore_derivatives() do
             insert!(collect(1:N-1), i, N)

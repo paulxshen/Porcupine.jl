@@ -17,9 +17,3 @@ Base.Float16(x::Complex) = ComplexF16(x)
 Base.Float32(x::Complex) = ComplexF32(x)
 Base.Float64(x::Complex) = ComplexF64(x)
 
-
-# f16(x) = Float16(x)
-# f32(x) = Float32(x)
-# f64(x) = Float64(x)
-
-# Base.Int(x::TrackedFloat32) = Int(Float32(x))

@@ -16,6 +16,7 @@ kmap(f, x) = kvmap((k, v) -> f(k) => v, x)
 function _vmap(f::Func, x, y)
     isempty(x) && return y
     isempty(y) && return x
+    # tuple.(keys(x), broadcast(f, _values(x), _values(y)))
     Pair.(keys(x), broadcast(f, _values(x), _values(y)))
 end
 vmap(f::Func, x::NamedTuple, y) = namedtuple(_vmap(f, x, y))

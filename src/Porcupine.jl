@@ -21,6 +21,6 @@ export imnormal, improj, getbbox, resize
 export togreek, fromgreek
 export round1, round2, round3, round4, round5, round6
 export disp, BREAK, DBREAK, @getr
-export _values, rcopy!
+export _values, rcopy!, call
 # export keys, _values, pairs, first
 end # module FDMTK

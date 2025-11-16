@@ -85,3 +85,4 @@ function disp(d::Map)
 end
 disp(x) = x
 
+call(f, args...) = f(args...)

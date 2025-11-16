@@ -10,6 +10,7 @@ function dict(kvs)
     end
     r
 end
+dict(d::NamedTuple) = OrderedDict(keys(d) .=> _values(d))
 # function dict(ps::Vector{<:Pair{K,V}}) where {K,V}
 #     dict(K, V, ps)
 # end
@@ -26,7 +27,8 @@ end
 # end
 
 namedtuple(x) = NamedTuple(x)
-namedtuple(d::AbstractDict) = NamedTuple(Pair.(Symbol.(keys(d)), _values(d)))
+# namedtuple(d::AbstractDict) = NamedTuple(tuple.(Symbol.(keys(d)), _values(d)))
+namedtuple(d::AbstractDict) = NamedTuple(Symbol.(keys(d)) .=> _values(d))
 function ChainRulesCore.rrule(::typeof(namedtuple), ps)
     y = namedtuple(ps)
     function NamedTuple_pullback(ȳ)
