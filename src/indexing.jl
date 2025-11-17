@@ -21,7 +21,7 @@ end
 _size(::Scalar) = 1
 _size(a) = size(a)
 _I(s, v::Scalar) = s
-_I(s, v) = range.(s, s .+ size(v) .- 1)
+_I(s, v) = range.(s, s .+ size(v) .- 1, size(v))
 function place!(a, v, start; additive=true)
     startws = nn(start)
     I = _I(start, v)

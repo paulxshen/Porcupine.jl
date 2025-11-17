@@ -1,6 +1,6 @@
 Scalar = Union{Number,Nothing,Missing,AbstractString,Symbol}
 List = Union{AbstractVector,AbstractSet,Tuple}
-ArrayLike = Union{List,AbstractArray}
+ArrayLike = Union{List,AbstractArray,Base.ValueIterator}
 Map = Union{AbstractDict,NamedTuple}
 Collection = Union{ArrayLike,Map}
 Str = Union{Symbol,AbstractChar,AbstractString}
