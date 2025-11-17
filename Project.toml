@@ -1,7 +1,7 @@
 name = "Porcupine"
 uuid = "3b53a3d7-3f34-4bba-8df2-4717a8b1e972"
 authors = ["Paul Shen <pxshen@alumni.stanford.edu>"]
-version = "1.0.41"
+version = "1.0.42"
 
 [deps]
 ArrayPadding = "fe5ef43c-4912-423d-9170-4bd5cb6a013a"
@@ -15,7 +15,6 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
-BFloat16s = "ab4f0b2a-ad5b-11e8-123f-65d77653426b"
 
 [weakdeps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
@@ -27,7 +26,6 @@ ZygoteExt = "Zygote"
 
 [compat]
 ArrayPadding = "1"
-BFloat16s = "0.6,0.7,0.8,1"
 CUDA = "5,6,7,8"
 ChainRulesCore = "1"
 DataStructures = "0.18,0.19,0.20,1"
