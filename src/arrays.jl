@@ -94,38 +94,35 @@ function getbbox(a)
     end
     hcat(lb, ub)
 end
-
-I2 = Matrix(I, 2, 2)
-I3 = Matrix(I, 3, 3)
-
-function resize(a::AbstractArray{T,N}, sz::Union{AbstractArray{<:Integer},NTuple{N,<:Integer}}) where {T,N}
-    if T <: Integer
-        F = Float32
-    else
-        F = T
-    end
-    size(a) == Tuple(sz) && return T.(a)
-    for (dims, (_n, n)) = enumerate(zip(size(a), sz))
+function resize(a::AbstractArray{T,N}, sz::Union{AbstractArray{<:Integer},NTuple{N,<:Integer}}; inbound=false) where {T<:Union{Complex,AbstractFloat},N}
+    _sz = Tuple(sz)
+    sz = size(a)
+    _sz == sz && return a
+    for (dims, (n, _n)) = enumerate(zip(sz, _sz))
         if _n != n
-            s = eachslice(a; dims)
-            v = map(1:n) do i
-                v = @ignore_derivatives nn((i - F(0.5)) * _n / n + F(0.5))
+            # s = eachslice(a; dims)
+            v = map(1:_n) do i
+                if inbound
+                    v = @ignore_derivatives nn((i - 1) * (n - 1) / (_n - 1) + 1)
+                else
+                    v = @ignore_derivatives nn((i - T(0.5)) * n / _n + T(0.5))
+                end
                 sum(v) do (j, w)
-                    j = max(1, j)
-                    j = min(j, _n)
-                    # w * selectdim(a, dims, j)
-                    w * s[j]
+                    j = clamp(j, 1, n)
+                    w * selectdim(a, dims, j)
+                    # w * s[j]
                 end
             end
-            p = collect(1:N-1)
+            p = collect(1:(N-1))
             @ignore_derivatives insert!(p, dims, N)
             a = permutedims(stack(v), p)
         end
     end
+    @assert size(a) == _sz
     a
 end
 
-function resize(a::AbstractArray{T,N}, axs; approx=false) where {T,N}
+function resize(a::AbstractArray{T,N}, axs; approx=false) where {T<:Union{Complex,AbstractFloat},N}
     for (i, ax) = zip(1:N, axs)
         I = ifelse.(i .== (1:N), (ax,), (:))
         if approx
