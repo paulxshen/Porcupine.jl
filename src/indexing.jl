@@ -40,7 +40,6 @@ AD() = haskey(ENV, "AD") && ENV["AD"] == "1"
 isnum(::Number) = true
 isnum(a...) = false
 
-# getindexf(a, I::Tuple)=    getindexf(a, I...)
 getindexf(a, I::Vararg{Integer,N}) where {N} = a[I...]
 function getindexf(a::AbstractArray{T,N}, I::Vararg{Real}) where {T,N}
     I = T.(I)

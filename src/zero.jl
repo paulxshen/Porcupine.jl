@@ -23,6 +23,8 @@ Base.:*(x, y::Nothing) = nothing
 Base.:*(x::Nothing, y) = nothing
 Base.:*(x::Nothing, y::Nothing) = nothing
 
+Base.:/(::Nothing, y) = nothing
+LinearAlgebra.diag(x::Number) = x
 Base.zero(x) = 0
 
 Base.:+(x::Nothing, y::ChainRulesCore.ZeroTangent) = x
