@@ -4,61 +4,12 @@ Base.length(x) = 1
 Base.sort(x) = sort(collect(x))
 pairs(x) = [k => x[k] for k in keys(x)]
 ° = π / 180
+Base.isfinite(x) = all(isfinite, x)
+Base.isfinite(d::AbstractDict) = all(isfinite, values(d))
 
 Base.getindex(x::Number, k::Str) = x
 gaussian(x) = exp(-x^2 / 2)
-dropitr(x) = first(x) == last(x) ? first(x) : x
-function adddims(a; dims)
-    sz = ignore_derivatives() do
-        sz = ones(Int, length(dims) + ndims(a))
-        dims0 = collect(size(a))
-        for i = 1:length(sz)
-            if i in dims
-            else
-                sz[i] = popfirst!(dims0)
-            end
-        end
-        sz
-    end
-    reshape(a, Tuple(sz))
-end
-
-
 Base.reverse(x::Number; kw...) = x
-
-# Base.convert(T, x) = convert.(T, x)
-
-# Base.Float64(x::List) = f64(x)
-trim(x, dx) = round.(x / dx) * dx
-round1(x) = round(x, digits=1)
-round2(x) = round(x, digits=2)
-round3(x) = round(x, digits=3)
-round4(x) = round(x, digits=4)
-round5(x) = round(x, digits=5)
-round6(x) = round(x, digits=6)
-macro convert(T, ex)
-    quote
-        $(esc(ex)) = rmap($(esc(ex))) do x
-            convert.($(esc(T)), x)
-        end
-    end
-end
-
-# getproperty(x::Map, k::Symbol) = x(k)
-function _getproperty(m::T, k::Symbol) where T
-    hasfield(T, k) && return getfield(m, k)
-    fieldcount(T) == 0 && return null
-    for f = fieldnames(T)
-        v = getproperty(getfield(m, f), k)
-        v != null && return v
-    end
-    null
-end
-macro getr(ex)
-    quote
-        Base.getproperty(m::$(esc(ex)), k::Symbol) = _getproperty(m, k)
-    end
-end
 
 function timepassed()
     ignore_derivatives() do
@@ -73,17 +24,24 @@ function timepassed()
     end
 end
 
-AUTODIFF() = haskey(ENV, "AUTODIFF") && ENV["AUTODIFF"] == "1"
-
 
 BREAK = "----------------------------------------"
 DBREAK = "========================================"
-disp(x::Number) = format(x; commas=true, precision=2)
-function disp(d::Map)
+𝒻(x::Integer) = format(x; commas=true)
+function 𝒻(x::Number)
+    n=round(Int, x)
+    d=abs(x-n)
+    d==0 && return 𝒻(n)
+    n==0 && return round(x, digits=3)
+    round(x, digits=2)
+end
+
+𝒻(a::AbstractArray) = join(𝒻.(a), ", ")
+function 𝒻(d::Map)
     s = JSON.json(d, 4)
     replace(s, "{" => "", "}\n" => "")
 end
-disp(x) = x
+𝒻(x) = x
 
 call(f, args...) = f(args...)
 

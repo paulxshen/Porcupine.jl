@@ -6,4 +6,3 @@ Collection = Union{ArrayLike,Map}
 Str = Union{Symbol,AbstractChar,AbstractString}
 Index = Union{S,Colon,UnitRange{T}} where {S<:Integer,T<:Integer}
 Func = Union{Function,Type}
-VectorField = Union{AbstractVector{<:AbstractArray},Map}

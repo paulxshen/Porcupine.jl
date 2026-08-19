@@ -28,3 +28,7 @@ LinearAlgebra.diag(x::Number) = x
 Base.zero(x) = 0
 
 Base.:+(x::Nothing, y::ChainRulesCore.ZeroTangent) = x
+
+Base.getindex(::Nothing, i...) = nothing
+Base.lastindex(::Nothing, i...) = nothing
+

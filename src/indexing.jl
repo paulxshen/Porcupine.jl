@@ -18,11 +18,22 @@ function nn(i::Number; kw...)
     end
 end
 
+function fitix(start, stop, sz)
+    start1=max.(start, 1)
+    stop1=min.(stop, sz)
+
+    start1=start1+stop1-stop
+    stop1=stop1+start1-start
+
+    start1, stop1
+end
+
 _size(::Scalar) = 1
 _size(a) = size(a)
 _I(s, v::Scalar) = s
 _I(s, v) = range.(s, s .+ size(v) .- 1, size(v))
 function place!(a, v, start; additive=true)
+    start, = fitix(start, start + _size(v) - 1, size(a))
     startws = nn(start)
     I = _I(start, v)
     for (s, w) = startws
@@ -54,31 +65,28 @@ function getindexf(a::AbstractArray{T,N}, I::Vararg{Real}) where {T,N}
     end
     sum(a)
 end
+
 function getindexf(a::AbstractArray{T,N}, I...) where {T,N}
     I = map(enumerate(I)) do (i, v)
         v === (:) ? (1:size(a, i)) : v
     end
-    s = T.(first.(I))
+
+    f=first.(I)
+    start, stop=fitix(f, last.(I), size(a))
+    p = @ignore_derivatives floor.(Int, start)
+    q = @ignore_derivatives ceil.(Int, start)
+
     l = length.(I)
-    p = @ignore_derivatives max.(floor.(Int, s), 1)
-    q = @ignore_derivatives min.(ceil.(Int, s), size(a))
-    a = a[(:).(p, q + l - 1)...]
-    for (d, (s, p, q, l)) = enumerate(zip(s, p, q, l))
+    a = a[(:).(p, q+l-1)...]
+    for (dims, (f, p, q, l)) = enumerate(zip(f, p, q, l))
         if q > p
-            h = d .== 1:N
-            a = (q - s) * a[ifelse.(h, (1:l,), (:,))...] + (s - p) * a[ifelse.(h, (2:l+1,), (:,))...]
-            # a = (q - s) * selectdim(a, d, 1:l) + (s - p) * selectdim(a, d, 2:l+1)
+            h=dims .== 1:N
+            a = (q - f) * a[ifelse.(h, (1:l,), (:,))...] + (f - p) * a[ifelse.(h, (2:(l+1),), (:,))...]
         end
     end
     dims = Tuple(findall(isnum, I))
     !isempty(dims) && return dropdims(a; dims)
     a
-    # if q > p
-    #     a = (q - s) * selectdim(a, dims - o, int(r + p - s)) + (s - p) * selectdim(a, dims - o, int(r + q - s))
-    # elseif isa(r, Real)
-    #     a = dropdims(a; dims)
-    # end
-    # o += isa(r, Real)
 end
 
 function indexof(v, x::Real)

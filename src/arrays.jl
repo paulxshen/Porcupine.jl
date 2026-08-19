@@ -53,32 +53,6 @@ function improj(a)
     tr(P) > 0 && return P / tr(P)
     P
 end
-# sz = size(d)
-# dmin, dmax = extrema(d)
-# if !(dmin + TOL < 0 < dmax - TOL)
-#     sum(d) / size(d, dims)
-# else
-#     global _aa = _a
-#     volume(_aa) |> display
-#     error()
-#     dm = d .* (d .< 0)
-#     dp = d .* (d .> 0)
-#     centers = sum.(map((dm, dp)) do m
-#         m = abs.(m)
-#         m .* Tuple.(CartesianIndices(m))
-#     end) ./ abs.(sum.((dm, dp)))
-#     # @show centers
-#     distm, distp = norm.(centers .- (sz / 2 + 0.5,))
-#     @show distm, distp
-#     if distm ≈ distp
-#         0
-#     elseif distm < distp
-#         sum(dm) / size(dm, dims)
-#     else
-#         sum(dp) / size(dp, dims)
-#     end
-# end
-
 function getbbox(a)
     lb = map(enumerate(size(a))) do (dim, n)
         for i = 1:n
@@ -123,6 +97,7 @@ function resize(a::AbstractArray{T,N}, sz::Union{AbstractArray{<:Integer},NTuple
 end
 
 function resize(a::AbstractArray{T,N}, axs; approx=false) where {T<:Union{Complex,AbstractFloat},N}
+    all(size(a) .== length.(axs)) && return a
     for (i, ax) = zip(1:N, axs)
         I = ifelse.(i .== (1:N), (ax,), (:))
         if approx
@@ -132,7 +107,7 @@ function resize(a::AbstractArray{T,N}, axs; approx=false) where {T<:Union{Comple
         end
         a = getindexf.((a,), I...)
         a = permutedims(stack(a), ignore_derivatives() do
-            insert!(collect(1:N-1), i, N)
+            insert!(collect(1:(N-1)), i, N)
         end)
     end
     a
@@ -143,7 +118,7 @@ unstack(a::AbstractArray{T,N}) where {T,N} = eachslice(a, dims=N)
 function smooth(a::AbstractArray{T,N}) where {T,N}
     for dims = 1:N
         n = size(a, dims)
-        a = (selectdim(a, dims, 1:n-1) + selectdim(a, dims, 2:n)) / 2
+        a = (selectdim(a, dims, 1:(n-1)) + selectdim(a, dims, 2:n)) / 2
     end
     a
 end

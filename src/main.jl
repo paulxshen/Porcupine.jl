@@ -16,7 +16,6 @@ include("map/queries.jl")
 include("map/restruct.jl")
 
 include("del.jl")
-include("vf.jl")
 include("grid.jl")
 
 include("string.jl")
