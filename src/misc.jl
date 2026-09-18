@@ -45,5 +45,5 @@ end
 
 call(f, args...) = f(args...)
 
-Base.zero(::Type{Any}) = 0f0
+# Base.zero(::Type{Any}) = 0f0
 LinearAlgebra.dot(a::AbstractArray, b::Number) = sum(a) * b
