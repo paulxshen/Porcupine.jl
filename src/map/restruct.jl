@@ -59,6 +59,7 @@ function rmap(f, T, c::S) where S
     S<:T && return f(c)
     S<:Union{AbstractArray,Tuple} && return rmap.((f,), (T,), c)
     S<:Union{NamedTuple,AbstractDict} && return S(keys(c) .=> rmap.((f,), (T,), _values(c)))
+    c
 end
 
 leaves(x) = [x]

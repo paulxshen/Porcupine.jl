@@ -1,4 +1,4 @@
-for F in (:(Base.Float16), :(Base.Float32), :(Base.Float64), :(Base.BFloat16))
+for F in (:(Base.Float16), :(Base.Float32), :(Base.Float64), :(Core.BFloat16))
     @eval $F(x::Str) = parse($F, string(x))
     @eval $F(d::Union{AbstractArray,Tuple,AbstractDict,NamedTuple}) = rmap($F, Number, d)
     @eval $F(x::$F) = x
