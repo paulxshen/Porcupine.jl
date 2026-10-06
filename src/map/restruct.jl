@@ -39,26 +39,11 @@ function fmap(f, x)
     re(fmap(f, xs))
 end
 
-# function rmap(f, d::Map)
-#     vmap(d) do v
-#         rmap(f, v)
-#     end
-# end
-# function rmap(f, a::ArrayLike)
-#     rmap.((f,), a)
-# end
-# function rmap(f, x)
-#     if isempty(propertynames(x))
-#         return x
-#     end
-#     xs, re = functor(x)
-#     re(rmap(f, xs))
-# end
-
 function rmap(f, T, c::S) where S
     S<:T && return f(c)
     S<:Union{AbstractArray,Tuple} && return rmap.((f,), (T,), c)
-    S<:Union{NamedTuple,AbstractDict} && return S(keys(c) .=> rmap.((f,), (T,), _values(c)))
+    S<:NamedTuple && return NamedTuple(keys(c) .=> rmap.((f,), (T,), _values(c)))
+    S<:AbstractDict && return OrderedDict(keys(c) .=> rmap.((f,), (T,), _values(c)))
     c
 end
 
