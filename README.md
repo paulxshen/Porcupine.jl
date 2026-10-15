@@ -1,22 +1,17 @@
 # Porcupine.jl
 
-Collection of Julia hacks for optimizing developer happiness and automatic differentiation. Most features are implemented as method overloads which are implicitly activated by importing the package. Features include:
-- Allows arithmetic operations (+-*/) between different types including numbers, arrays, tuples, and nested named tuples and dictionaries using recursive broadcasting. 
-- Defines new operators:
-    - `⊙` for recursively elementwise * instead of matrix multiplication
-    - `⊘` for recursively elementwise / instead of matrix division
-- Allows arithmetic operations with `nothing` which is treated like zero. Fixes some `Zygote.jl` errors involving `nothing` tangent propagation.
-- Linear interpolation of multidimensional arrays via () syntax. Also works on ranges but only if step size is 1.
-- "Fuzzy" indexing for named tuples and dictionaries via () syntax. If exact key is not found, it will try to retrieve:
-    - matching nested keys (arbitrarilly deep)
-    - keys differing by Symbol vs String type
-    - the ith value if the key is an integer i
-- Automatic differentiation (AD) friendly constructors
-    - `dict` for OrderedDict
-    - `namedtuple` for NamedTuple
+Julia conveniences for developer happiness, concise code and automatic differentiation (Zygote). Most features are method overloads activated by `using Porcupine`.
+
+- **Arithmetic across containers**: `+ - * /` automatically recurse through nested and mixed numbers, arrays, tuples, NamedTuples and dicts.
+- **Recursive maps**: `rmap`, `vmap`, `kmap`, `kvmap`, `leaves`, `flatten`, and `Float32(x)` on nested containers. `cpu`/`gpu` move every array inside a nested structure.
+- **Interpolated indexing** `a(i...)` / `getindexf`: multilinear interpolation at real indices, or over unit-step ranges.
+- **Fuzzy map lookup** `d(k)`: tries an exact key, then nested keys (any depth), Symbol↔String, and the i-th value for an integer key.
+- **`nothing` as zero**: `nothing + 1 == 1`, which avoids some Zygote `nothing`-tangent errors.
+  `d(:c) == [1.0, 2.0]`, `d("a") == 1.0`, `d(1) == 1.0`
+  `Float32[1 2; 3 4](1.5f0, 1.5f0) == 2.5f0`
+- **Array utilities**: `resize` (linear resampling), `crop`, `place!`, `centroids`, `getbbox`, `indexof`.
+- **Misc**: `int` (checked rounding), `𝒻` (pretty formatting), `togreek`/`fromgreek`.
 
 
 ## Contributors
-Paul Shen
-pxshen@alumni.stanford.edu
-Luminescent AI
+Paul Shen, pxshen@alumni.stanford.edu, Luminescent AI

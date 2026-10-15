@@ -51,19 +51,17 @@ AD() = haskey(ENV, "AD") && ENV["AD"] == "1"
 isnum(::Number) = true
 isnum(a...) = false
 
-getindexf(a, I::Vararg{Integer,N}) where {N} = a[I...]
-function getindexf(a::AbstractArray{T,N}, I::Vararg{Real}) where {T,N}
+getindexf(a::AbstractArray, I::Vararg{Integer}) = a[I...]
+# multilinear interpolation: outer product of per-dim weights against the surrounding corners
+function getindexf(a::AbstractArray{T}, I::Vararg{Real,M}) where {T,M}
     I = T.(I)
     p = @ignore_derivatives max.(floor.(Int, I), 1)
-    q = @ignore_derivatives min.(ceil.(Int, I), size(a))
-    a = a[(:).(p, q)...]
-    for (d, (s, p, q)) = enumerate(zip(I, p, q))
-        if q > p
-            h = d .== 1:N
-            a = (q - s) * a[ifelse.(h, (1:1,), (:,))...] + (s - p) * a[ifelse.(h, (2:2,), (:,))...]
-        end
+    q = @ignore_derivatives min.(ceil.(Int, I), size(a)[1:M])
+    w = ntuple(M) do d
+        v = p[d] == q[d] ? [one(T)] : [q[d] - I[d], I[d] - p[d]]
+        reshape(v, ntuple(i -> i == d ? length(v) : 1, M))
     end
-    sum(a)
+    sum(.*(w...) .* a[(:).(p, q)...])
 end
 
 function getindexf(a::AbstractArray{T,N}, I...) where {T,N}
@@ -71,23 +69,22 @@ function getindexf(a::AbstractArray{T,N}, I...) where {T,N}
         v === (:) ? (1:size(a, i)) : v
     end
 
-    f=first.(I)
-    start, stop=fitix(f, last.(I), size(a))
+    f = first.(I)
+    start, stop = fitix(f, last.(I), size(a))
     p = @ignore_derivatives floor.(Int, start)
     q = @ignore_derivatives ceil.(Int, start)
 
     l = length.(I)
-    a = a[(:).(p, q+l-1)...]
-    for (dims, (f, p, q, l)) = enumerate(zip(f, p, q, l))
-        if q > p
-            h=dims .== 1:N
-            a = (q - f) * a[ifelse.(h, (1:l,), (:,))...] + (f - p) * a[ifelse.(h, (2:(l+1),), (:,))...]
-        end
+    a = view(a, (:).(p, q + l - 1)...)
+    for (d, (f, p, q, l)) = enumerate(zip(f, p, q, l))
+        q > p && (a = _lerp(a, d, l, q - f, f - p))
     end
+    a isa SubArray && (a = copy(a))
     dims = Tuple(findall(isnum, I))
     !isempty(dims) && return dropdims(a; dims)
     a
 end
+_lerp(a, d, l, u, v) = u .* selectdim(a, d, 1:l) .+ v .* selectdim(a, d, 2:(l+1))
 
 function indexof(v, x::Real)
     v[1] > v[end] && return -indexof(reverse(v), x)

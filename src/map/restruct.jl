@@ -22,28 +22,15 @@ end
 vmap(f::Func, x::NamedTuple, y) = namedtuple(_vmap(f, x, y))
 vmap(f::Func, x::AbstractDict, y) = dict(_vmap(f, x, y))
 
-fmap(f, x::AbstractArray{<:Number}) = f(x)
-function fmap(f, d::Map)
-    vmap(d) do v
-        fmap(f, v)
-    end
-end
-function fmap(f, a::ArrayLike)
-    fmap.((f,), a)
-end
-function fmap(f, x)
-    if isempty(propertynames(x))
-        return x
-    end
-    xs, re = functor(x)
-    re(fmap(f, xs))
-end
-
 function rmap(f, T, c::S) where S
     S<:T && return f(c)
     S<:Union{AbstractArray,Tuple} && return rmap.((f,), (T,), c)
     S<:NamedTuple && return NamedTuple(keys(c) .=> rmap.((f,), (T,), _values(c)))
     S<:AbstractDict && return OrderedDict(keys(c) .=> rmap.((f,), (T,), _values(c)))
+    if !isempty(propertynames(c))
+        xs, re = functor(c)
+        return re(map(x -> rmap(f, T, x), xs))
+    end
     c
 end
 

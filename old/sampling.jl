@@ -1,13 +1,13 @@
 
+_downsample(f, a, rs) = [f(a[getindex.(rs, Tuple(I))...]) for I = CartesianIndices(length.(rs))]
+_ratio(r::Int, d) = r
+_ratio(r, d) = r[d]
 function downsample(f, a, ratio::Union{Int,AbstractVector{Int},NTuple{N,Int}}) where {N}
     ratio == 1 && return a
-    [
-        begin
-            I = Tuple(I)
-            start = 1 + ratio .* (I - 1)
-            f(a[range.(start, start + ratio - 1)...])
-        end for I = CartesianIndices(Tuple(size(a) .÷ ratio))
-    ]
+    _downsample(f, a, ntuple(ndims(a)) do d
+        r = _ratio(ratio, d)
+        [i:i+r-1 for i = 1:r:size(a, d)-r+1]
+    end)
 end
 
 downsample_by_range(f, a::AbstractArray, ranges; kw...) = downsample_by_range(f, (a,), ranges; kw...)
@@ -25,30 +25,18 @@ end
 
 _downvec(r::Real, len) = fill(Int(r), Int(len / r))
 _downvec(v::AbstractArray, len) = int(vec(v))
+_blocks(s) = range.(cumsum(s) .- s .+ 1, cumsum(s))
 function downsample(f, a, spacings)
     spacings = _downvec.(spacings, size(a))
     @assert all(size(a) .== int(sum.(spacings)))
-    sz = Tuple(length.(spacings))
-    stops = cumsum.(vec.(spacings))
-    starts = stops - spacings + 1
-    [f(a[range.(getindex.(starts, Tuple(I)), getindex.(stops, Tuple(I)))...]) for I = CartesianIndices(sz)]
+    _downsample(f, a, Tuple(_blocks.(spacings)))
 end
 downsample(a, v) = downsample(mean, a, v)
 
 _upvec(r::Real, len) = fill(Int(r), Int(len))
 _upvec(v::AbstractArray, len) = int(vec(v))
-function upsample(a, spacings)
-    spacings = _upvec.(spacings, size(a))
-    sz = size(a)
-    stops = cumsum.(vec.(spacings))
-    starts = stops - spacings + 1
-    r = zeros(eltype(a), Tuple(sum.(spacings)))
-    for I = CartesianIndices(sz)
-        r[range.(getindex.(starts, Tuple(I)), getindex.(stops, Tuple(I)))...] .= a[I]
-
-    end
-    r
-end
+_repidx(s) = [i for (i, k) = enumerate(s) for _ = 1:k]
+upsample(a, spacings) = a[@ignore_derivatives(_repidx.(_upvec.(spacings, size(a))))...]
 # function upsample(a, ratio)
 #     A = zeros(complex(eltype(a)), ratio * size(a))
 #     A[Base.OneTo.(size(a))...] .= fft(a)

@@ -1,0 +1,2 @@
+## Conventions
+`*.jl` holds readable reference code. A dot-prefixed `.*.jl` file is an optimized drop-in for it with the same API, included in its place when present (e.g. `src/.indexing.jl`).

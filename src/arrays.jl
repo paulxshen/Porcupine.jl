@@ -69,30 +69,20 @@ function getbbox(a)
     hcat(lb, ub)
 end
 function resize(a::AbstractArray{T,N}, sz::Union{AbstractArray{<:Integer},NTuple{N,<:Integer}}; inbound=false) where {T<:Union{Complex,AbstractFloat},N}
-    _sz = Tuple(sz)
-    sz = size(a)
-    _sz == sz && return a
-    for (dims, (n, _n)) = enumerate(zip(sz, _sz))
-        if _n != n
-            # s = eachslice(a; dims)
-            v = map(1:_n) do i
-                if inbound
-                    v = @ignore_derivatives nn((i - 1) * (n - 1) / (_n - 1) + 1)
-                else
-                    v = @ignore_derivatives nn((i - T(0.5)) * n / _n + T(0.5))
-                end
-                sum(v) do (j, w)
-                    j = clamp(j, 1, n)
-                    w * selectdim(a, dims, j)
-                    # w * s[j]
-                end
-            end
-            p = collect(1:(N-1))
-            @ignore_derivatives insert!(p, dims, N)
-            a = permutedims(stack(v), p)
+    for (d, m) = enumerate(Tuple(sz))
+        n = size(a, d)
+        m == n && continue
+        # linear interpolation along d: blend of 2 gathers
+        p, w = ignore_derivatives() do
+            R = real(T)
+            x = inbound ? [R((i - 1) * (n - 1) / (m - 1) + 1) for i = 1:m] : [(i - R(0.5)) * n / m + R(0.5) for i = 1:m]
+            p = floor.(Int, x)
+            p, copyto!(similar(a, R, ntuple(i -> i == d ? m : 1, N)), x - p)
         end
+        I(j) = ntuple(i -> i == d ? clamp.(j, 1, n) : (:), N)
+        a = (1 .- w) .* a[I(p)...] + w .* a[I(p .+ 1)...]
     end
-    @assert size(a) == _sz
+    @assert size(a) == Tuple(sz)
     a
 end
 
@@ -115,11 +105,5 @@ end
 
 unstack(a::AbstractArray{T,N}) where {T,N} = eachslice(a, dims=N)
 
-function smooth(a::AbstractArray{T,N}) where {T,N}
-    for dims = 1:N
-        n = size(a, dims)
-        a = (selectdim(a, dims, 1:(n-1)) + selectdim(a, dims, 2:n)) / 2
-    end
-    a
-end
+smooth(a::AbstractArray) = _centroids(a, 1:ndims(a))
 Base.step(v::AbstractVector) = v[2] - v[1]
