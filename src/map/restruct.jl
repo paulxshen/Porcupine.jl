@@ -33,6 +33,7 @@ function rmap(f, T, c::S) where S
     end
     c
 end
+rmap(f, c) = rmap(f, AbstractArray{<:Number}, c)
 
 leaves(x) = [x]
 function leaves(d::Union{Map,AbstractVector{<:AbstractArray}})
