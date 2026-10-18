@@ -1,6 +1,6 @@
 module Porcupine
 include("main.jl")
-export Map, List, Collection, ArrayLike, Str
+export Map, List, Collection, ArrayLike, Str, MyType
 export dict, namedtuple, regex
 export getindexr, approx_getindex
 export getindexf, getindexs, place!, crop, indexof
