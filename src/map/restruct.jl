@@ -24,6 +24,7 @@ vmap(f::Func, x::AbstractDict, y) = dict(_vmap(f, x, y))
 
 function rmap(f, T, c::S) where S
     S<:T && return f(c)
+    S<:AbstractArray{<:T} && return f.(c)
     S<:Union{AbstractArray,Tuple} && return rmap.((f,), (T,), c)
     S<:NamedTuple && return NamedTuple(keys(c) .=> rmap.((f,), (T,), _values(c)))
     S<:AbstractDict && return OrderedDict(keys(c) .=> rmap.((f,), (T,), _values(c)))
